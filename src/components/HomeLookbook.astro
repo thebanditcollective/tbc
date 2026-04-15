@@ -222,18 +222,14 @@ const slides = [
     const nextButton = lookbook.querySelector('[data-home-lookbook-next]');
     const dotsContainer = lookbook.parentElement?.querySelector('[data-home-lookbook-dots]');
     const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-home-lookbook-dot]')) : [];
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
     let hasSwiped = false;
     let activeIndex = 0;
     let wheelLocked = false;
-    let swipePointerId = null;
-    let swipeStartX = 0;
-    let swipeStartY = 0;
-    let swipeStartOffset = 0;
-    let swipeStartIndex = 0;
-    let swipeOffset = 0;
-    let isPointerDown = false;
-    let isHorizontalSwipe = false;
     let lastViewportWidth = window.innerWidth;
+    let scrollSyncFrame = 0;
+    let scrollEndTimer = 0;
+    let suppressNextLightboxClick = false;
 
     if (!track || !cards.length || !dots.length) return;
 
@@ -255,9 +251,17 @@ const slides = [
     };
 
     const setTrackOffset = (offset, animate = true) => {
-      swipeOffset = Math.max(0, Math.min(getMaxOffset(), offset));
+      const targetOffset = Math.max(0, Math.min(getMaxOffset(), offset));
+
+      if (mobileQuery.matches) {
+        track.style.transition = '';
+        track.style.transform = '';
+        track.scrollTo({ left: targetOffset, behavior: animate ? 'smooth' : 'auto' });
+        return;
+      }
+
       track.style.transition = animate ? '' : 'none';
-      track.style.transform = `translateX(-${swipeOffset}px)`;
+      track.style.transform = `translateX(-${targetOffset}px)`;
     };
 
     const getNearestReachableIndex = (offset) => {
@@ -332,95 +336,39 @@ const slides = [
       }, 520);
     };
 
-    const resetSwipe = () => {
-      swipePointerId = null;
-      isPointerDown = false;
-      isHorizontalSwipe = false;
-      track.style.transition = '';
-    };
-
-    const handlePointerDown = (event) => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-
-      swipePointerId = event.pointerId;
-      swipeStartX = event.clientX;
-      swipeStartY = event.clientY;
-      swipeStartIndex = activeIndex;
-      swipeStartOffset = getCardOffset(activeIndex);
-      swipeOffset = swipeStartOffset;
-      isPointerDown = true;
-      isHorizontalSwipe = false;
-    };
-
-    const handlePointerMove = (event) => {
-      if (!isPointerDown || event.pointerId !== swipePointerId) return;
-
-      const deltaX = event.clientX - swipeStartX;
-      const deltaY = event.clientY - swipeStartY;
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
-
-      if (!isHorizontalSwipe) {
-        if (absX < 8 && absY < 8) return;
-
-        if (absY > absX * 1.35) {
-          resetSwipe();
-          return;
-        }
-
-        if (absX < 8 || absX < absY * 0.6) return;
-        isHorizontalSwipe = true;
-        track.setPointerCapture?.(event.pointerId);
-      }
-
-      event.preventDefault();
-      setTrackOffset(swipeStartOffset - deltaX, false);
-
-      const nearestIndex = getNearestReachableIndex(swipeOffset);
+    const syncActiveFromNativeScroll = () => {
+      if (!mobileQuery.matches) return;
+      const nearestIndex = getNearestReachableIndex(track.scrollLeft);
       if (nearestIndex !== activeIndex) {
         activeIndex = nearestIndex;
         update();
       }
     };
 
-    const handlePointerUp = (event) => {
-      if (!isPointerDown || event.pointerId !== swipePointerId) return;
+    const handleNativeScroll = () => {
+      if (!mobileQuery.matches) return;
+      suppressNextLightboxClick = true;
+      window.clearTimeout(scrollEndTimer);
+      scrollEndTimer = window.setTimeout(() => {
+        suppressNextLightboxClick = false;
+      }, 180);
 
-      if (!isHorizontalSwipe) {
-        resetSwipe();
-        return;
-      }
-
-      const deltaX = event.clientX - swipeStartX;
-      const deltaY = event.clientY - swipeStartY;
-      const swipeThreshold = Math.max(32, lookbook.clientWidth * 0.1);
-      const isIntentionalSwipe = Math.abs(deltaX) >= swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 0.6;
-      const targetIndex = isIntentionalSwipe
-        ? swipeStartIndex + (deltaX < 0 ? 1 : -1)
-        : swipeStartIndex;
-
-      suppressLookbookClick = true;
-      window.setTimeout(() => {
-        suppressLookbookClick = false;
-      }, 350);
-      scrollToCard(targetIndex);
-      resetSwipe();
-    };
-
-    const handlePointerCancel = (event) => {
-      if (event.pointerId !== swipePointerId) return;
-      if (isHorizontalSwipe) scrollToCard(activeIndex);
-      resetSwipe();
+      window.cancelAnimationFrame(scrollSyncFrame);
+      scrollSyncFrame = window.requestAnimationFrame(syncActiveFromNativeScroll);
     };
 
     prevButton?.addEventListener('click', () => scrollByCard(-1));
     nextButton?.addEventListener('click', () => scrollByCard(1));
     lookbook.addEventListener('wheel', handleWheel, { passive: false });
-    track.addEventListener('pointerdown', handlePointerDown);
-    track.addEventListener('pointermove', handlePointerMove);
-    track.addEventListener('pointerup', handlePointerUp);
-    track.addEventListener('pointercancel', handlePointerCancel);
-    track.addEventListener('lostpointercapture', handlePointerCancel);
+    track.addEventListener('scroll', handleNativeScroll, { passive: true });
+    lookbookLightboxTriggers.forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        if (!mobileQuery.matches || !suppressNextLightboxClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressLookbookClick = false;
+      }, true);
+    });
     window.addEventListener('resize', () => {
       if (window.innerWidth === lastViewportWidth) return;
       lastViewportWidth = window.innerWidth;
@@ -789,13 +737,32 @@ const slides = [
     }
 
     .home-lookbook__track {
+      overflow-x: auto;
+      overflow-y: hidden;
       padding-right: 0;
       padding-left: 0;
       gap: 0.5rem;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      touch-action: pan-x pan-y;
+      -webkit-overflow-scrolling: touch;
+      transform: none !important;
+      transition: none;
+      scrollbar-width: none;
+    }
+
+    .home-lookbook__track::-webkit-scrollbar {
+      display: none;
     }
 
     .home-lookbook__card {
       flex-basis: 89vw;
+      scroll-snap-align: start;
+    }
+
+    .home-lookbook__card img {
+      height: auto;
+      object-fit: initial;
     }
 
     .home-lookbook__arrow {
