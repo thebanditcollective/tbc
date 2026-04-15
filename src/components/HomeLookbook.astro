@@ -222,6 +222,8 @@ const slides = [
     const nextButton = lookbook.querySelector('[data-home-lookbook-next]');
     const dotsContainer = lookbook.parentElement?.querySelector('[data-home-lookbook-dots]');
     const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-home-lookbook-dot]')) : [];
+    const finalCard = cards[cards.length - 1];
+    const finalReferenceImage = cards[cards.length - 2]?.querySelector('img');
     const mobileQuery = window.matchMedia('(max-width: 767px)');
     let hasSwiped = false;
     let activeIndex = 0;
@@ -232,6 +234,20 @@ const slides = [
     let suppressNextLightboxClick = false;
 
     if (!track || !cards.length || !dots.length) return;
+
+    const syncFinalCardHeight = () => {
+      if (!finalCard || !finalReferenceImage) return;
+
+      if (!mobileQuery.matches) {
+        finalCard.style.removeProperty('--lookbook-final-card-height');
+        return;
+      }
+
+      const imageHeight = finalReferenceImage.getBoundingClientRect().height;
+      if (imageHeight > 0) {
+        finalCard.style.setProperty('--lookbook-final-card-height', `${imageHeight}px`);
+      }
+    };
 
     const getMaxOffset = () => {
       const lastCard = cards[cards.length - 1];
@@ -372,9 +388,13 @@ const slides = [
     window.addEventListener('resize', () => {
       if (window.innerWidth === lastViewportWidth) return;
       lastViewportWidth = window.innerWidth;
+      syncFinalCardHeight();
       scrollToCard(activeIndex);
     });
+    mobileQuery.addEventListener('change', syncFinalCardHeight);
+    finalReferenceImage?.addEventListener('load', syncFinalCardHeight, { once: true });
 
+    syncFinalCardHeight();
     update();
   });
 </script>
@@ -758,6 +778,11 @@ const slides = [
     .home-lookbook__card {
       flex-basis: 89vw;
       scroll-snap-align: start;
+    }
+
+    .home-lookbook__card--end {
+      height: var(--lookbook-final-card-height, auto);
+      scroll-snap-align: end;
     }
 
     .home-lookbook__card img {
