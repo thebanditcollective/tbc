@@ -5,20 +5,28 @@ import HomeLookbook from '../components/HomeLookbook.astro';
 import HomePressStrip from '../components/HomePressStrip.astro';
 import HomeSpectrumFeature from '../components/HomeSpectrumFeature.astro';
 import HomeStatement from '../components/HomeStatement.astro';
-import { withBase } from '../lib/paths';
+import { Image } from 'astro:assets';
+import heroDesktop01 from '../assets/images/home/hero/hero-desktop-01.jpg';
+import heroDesktop02 from '../assets/images/home/hero/hero-desktop-02.jpg';
+import heroDesktop03 from '../assets/images/home/hero/hero-desktop-03.jpg';
+import heroDesktop04 from '../assets/images/home/hero/hero-desktop-04.jpg';
+import heroMobile01 from '../assets/images/home/hero/hero-mobile-01.jpg';
+import heroMobile02 from '../assets/images/home/hero/hero-mobile-02.jpg';
+import heroMobile03 from '../assets/images/home/hero/hero-mobile-03.jpg';
+import heroMobile04 from '../assets/images/home/hero/hero-mobile-04.jpg';
 
 const desktopHeroImages = [
-  '/images/home/home-hero.jpg',
-  '/images/home/home-hero-v2.jpg',
-  '/images/home/home-hero-v3.jpg',
-  '/images/home/home-hero-v4.jpg'
+  heroDesktop01,
+  heroDesktop02,
+  heroDesktop03,
+  heroDesktop04
 ];
 
 const mobileHeroImages = [
-  '/images/home/home-hero-mobile.jpg',
-  '/images/home/home-hero-mobile-v2.jpg',
-  '/images/home/home-hero-mobile-v3.jpg',
-  '/images/home/home-hero-mobile-v4.jpg'
+  heroMobile01,
+  heroMobile02,
+  heroMobile03,
+  heroMobile04
 ];
 ---
 
@@ -30,26 +38,30 @@ const mobileHeroImages = [
   <section class="hero" data-home-hero>
     <div class="hero__stack hero__stack--desktop" aria-hidden="true">
       {desktopHeroImages.map((image, index) => (
-        <img
-          class:list={['hero__image', { 'is-active': index === 0 }]}
-          src={withBase(image)}
+        <Image
+          class={`hero__image${index === 0 ? ' is-active' : ''}`}
+          src={image}
           alt=""
-          width="1600"
-          height="1000"
+          format="webp"
+          quality={82}
           loading={index === 0 ? 'eager' : 'lazy'}
+          fetchpriority={index === 0 ? 'high' : 'low'}
+          decoding={index === 0 ? 'sync' : 'async'}
           data-home-hero-slide
         />
       ))}
     </div>
     <div class="hero__stack hero__stack--mobile" aria-hidden="true">
       {mobileHeroImages.map((image, index) => (
-        <img
-          class:list={['hero__image', { 'is-active': index === 0 }]}
-          src={withBase(image)}
+        <Image
+          class={`hero__image${index === 0 ? ' is-active' : ''}`}
+          src={image}
           alt=""
-          width="1200"
-          height="1600"
+          format="webp"
+          quality={82}
           loading={index === 0 ? 'eager' : 'lazy'}
+          fetchpriority={index === 0 ? 'high' : 'low'}
+          decoding={index === 0 ? 'sync' : 'async'}
           data-home-hero-mobile-slide
         />
       ))}
@@ -207,15 +219,20 @@ const mobileHeroImages = [
 
   @media (max-width: 720px) {
     .hero {
-      height: 100dvh;
-      min-height: 0;
-      max-height: 100dvh;
+      left: 50%;
+      width: 100vw;
+      height: 100svh;
+      min-height: 100svh;
+      max-height: none;
+      transform: translateX(-50%);
     }
 
     .hero__image {
-      height: 100%;
-      min-height: 0;
-      max-height: 100dvh;
+      width: 100vw;
+      max-width: none;
+      height: 100svh;
+      min-height: 100svh;
+      max-height: none;
     }
 
     .hero__stack--desktop {

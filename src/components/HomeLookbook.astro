@@ -1,29 +1,36 @@
 ---
+import { Image } from 'astro:assets';
+import lookbook01 from '../assets/images/home/lookbook/lookbook-01.jpg';
+import lookbook02 from '../assets/images/home/lookbook/lookbook-02.jpg';
+import lookbook03 from '../assets/images/home/lookbook/lookbook-03.jpg';
+import lookbook04 from '../assets/images/home/lookbook/lookbook-04.jpg';
+import lookbook05 from '../assets/images/home/lookbook/lookbook-05.jpg';
+import lookbook06 from '../assets/images/home/lookbook/lookbook-06.jpg';
 import { withBase } from '../lib/paths';
 
 const slides = [
   {
-    src: withBase('/images/home/home carousel/ClintonStreet_012.jpg'),
+    src: lookbook01,
     alt: 'Living room redesign with oak millwork'
   },
   {
-    src: withBase('/images/home/home carousel/ClintonStreet_312A.jpg'),
+    src: lookbook02,
     alt: 'Kitchen renovation with marble island'
   },
   {
-    src: withBase('/images/home/home carousel/DSC_3061-1.jpg'),
+    src: lookbook03,
     alt: 'Primary bedroom with custom headboard'
   },
   {
-    src: withBase('/images/home/home carousel/DSC_3078-3.jpg'),
+    src: lookbook04,
     alt: 'Powder room with wallpaper detail'
   },
   {
-    src: withBase('/images/home/home carousel/DSC_3116-1.jpg'),
+    src: lookbook05,
     alt: 'Dining room with plaster pendant'
   },
   {
-    src: withBase('/images/home/home carousel/DSC_3251-1 crop.jpg'),
+    src: lookbook06,
     alt: 'Entry foyer with limestone floor'
   }
 ];
@@ -47,13 +54,15 @@ const slides = [
       <div class="home-lookbook__track" data-home-lookbook-track tabindex="0" aria-label="Project image carousel">
         {slides.map((slide, index) => (
           <article class:list={['home-lookbook__card', { 'is-active': index === 0 }]} data-home-lookbook-card>
-            <img
+            <Image
               class="carousel-img"
               src={slide.src}
               alt={slide.alt}
-              loading={index < 2 ? 'eager' : 'lazy'}
-              width="1200"
-              height="1500"
+              format="webp"
+              quality={82}
+              loading={index < 3 ? 'eager' : 'lazy'}
+              fetchpriority={index < 3 ? 'auto' : 'low'}
+              decoding="async"
               data-lookbook-lightbox-index={index}
               data-lookbook-lightbox-trigger
             />
@@ -129,6 +138,7 @@ const slides = [
   const lookbookLightboxTriggers = Array.from(document.querySelectorAll('[data-lookbook-lightbox-trigger]'));
   let lookbookLightboxIndex = 0;
   let lookbookTouchStartX = 0;
+  let suppressLookbookClick = false;
 
   const syncLookbookLightbox = () => {
     if (!lookbookLightbox || !lookbookLightboxImage) return;
@@ -158,7 +168,13 @@ const slides = [
   };
 
   lookbookLightboxTriggers.forEach((trigger) => {
-    trigger.addEventListener('click', () => {
+    trigger.addEventListener('click', (event) => {
+      if (suppressLookbookClick) {
+        event.preventDefault();
+        suppressLookbookClick = false;
+        return;
+      }
+
       if (!lookbookLightbox || !lookbookLightboxImage) return;
       lookbookLightboxIndex = Number(trigger.getAttribute('data-lookbook-lightbox-index')) || 0;
       syncLookbookLightbox();
@@ -208,6 +224,12 @@ const slides = [
     let hasSwiped = false;
     let activeIndex = 0;
     let wheelLocked = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartOffset = 0;
+    let touchOffset = 0;
+    let isTouching = false;
+    let isTouchSwipe = false;
 
     if (!track || !cards.length || !dots.length) return;
 
@@ -223,11 +245,32 @@ const slides = [
       return index === -1 ? cards.length - 1 : index;
     };
 
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        scrollToCard(index);
-      });
-    });
+    const getCardOffset = (index) => {
+      const card = cards[Math.max(0, Math.min(getLastReachableIndex(), index))];
+      return Math.min(card.offsetLeft - cards[0].offsetLeft, getMaxOffset());
+    };
+
+    const setTrackOffset = (offset, animate = true) => {
+      touchOffset = Math.max(0, Math.min(getMaxOffset(), offset));
+      track.style.transition = animate ? '' : 'none';
+      track.style.transform = `translateX(-${touchOffset}px)`;
+    };
+
+    const getNearestReachableIndex = (offset) => {
+      const lastReachableIndex = getLastReachableIndex();
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+
+      for (let index = 0; index <= lastReachableIndex; index += 1) {
+        const distance = Math.abs(getCardOffset(index) - offset);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      }
+
+      return nearestIndex;
+    };
 
     const update = () => {
       cards.forEach((card, index) => card.classList.toggle('is-active', index === activeIndex));
@@ -255,10 +298,15 @@ const slides = [
 
     const scrollToCard = (index) => {
       activeIndex = Math.max(0, Math.min(getLastReachableIndex(), index));
-      const offset = cards[activeIndex].offsetLeft - cards[0].offsetLeft;
-      track.style.transform = `translateX(-${Math.min(offset, getMaxOffset())}px)`;
+      setTrackOffset(getCardOffset(activeIndex));
       update();
     };
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        scrollToCard(index);
+      });
+    });
 
     const handleWheel = (event) => {
       const isHorizontalGesture = Math.abs(event.deltaX) > Math.abs(event.deltaY) * 1.2;
@@ -280,9 +328,61 @@ const slides = [
       }, 520);
     };
 
+    const handleTouchStart = (event) => {
+      if (event.touches.length !== 1) return;
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+      touchStartOffset = getCardOffset(activeIndex);
+      touchOffset = touchStartOffset;
+      isTouching = true;
+      isTouchSwipe = false;
+    };
+
+    const handleTouchMove = (event) => {
+      if (!isTouching || event.touches.length !== 1) return;
+
+      const deltaX = event.touches[0].clientX - touchStartX;
+      const deltaY = event.touches[0].clientY - touchStartY;
+
+      if (!isTouchSwipe) {
+        if (Math.abs(deltaY) > Math.abs(deltaX) || Math.abs(deltaX) < 8) return;
+        isTouchSwipe = true;
+      }
+
+      event.preventDefault();
+      setTrackOffset(touchStartOffset - deltaX, false);
+
+      const nearestIndex = getNearestReachableIndex(touchOffset);
+      if (nearestIndex !== activeIndex) {
+        activeIndex = nearestIndex;
+        update();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (!isTouching) return;
+
+      isTouching = false;
+      if (!isTouchSwipe) {
+        track.style.transition = '';
+        return;
+      }
+
+      suppressLookbookClick = true;
+      window.setTimeout(() => {
+        suppressLookbookClick = false;
+      }, 350);
+      scrollToCard(getNearestReachableIndex(touchOffset));
+      isTouchSwipe = false;
+    };
+
     prevButton?.addEventListener('click', () => scrollByCard(-1));
     nextButton?.addEventListener('click', () => scrollByCard(1));
     lookbook.addEventListener('wheel', handleWheel, { passive: false });
+    track.addEventListener('touchstart', handleTouchStart, { passive: true });
+    track.addEventListener('touchmove', handleTouchMove, { passive: false });
+    track.addEventListener('touchend', handleTouchEnd, { passive: true });
+    track.addEventListener('touchcancel', handleTouchEnd, { passive: true });
     window.addEventListener('resize', () => scrollToCard(activeIndex));
 
     update();
@@ -318,6 +418,8 @@ const slides = [
     gap: 0.875rem;
     width: 100%;
     padding: 0 clamp(0.625rem, 0.55vw, 0.875rem) 1rem clamp(1.25rem, 5.35vw, 6.5rem);
+    touch-action: pan-y;
+    user-select: none;
     will-change: transform;
     transition: transform 520ms var(--ease-luxury);
   }
@@ -632,11 +734,18 @@ const slides = [
       min-height: auto;
     }
 
+    .home-lookbook__viewport {
+      left: 50%;
+      width: 100vw;
+      transform: translateX(-50%);
+    }
+
     .home-lookbook__inner {
       padding: 0 0 1rem;
     }
 
     .home-lookbook__track {
+      padding-right: 0;
       padding-left: 0;
       gap: 0.5rem;
     }

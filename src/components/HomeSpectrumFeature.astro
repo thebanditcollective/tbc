@@ -1,14 +1,17 @@
 ---
-import { withBase } from '../lib/paths';
+import { Image } from 'astro:assets';
+import spectrumFeature from '../assets/images/home/spectrum/spectrum-feature.jpg';
 ---
 
 <section class="home-spectrum">
   <div class="home-spectrum__image">
-    <img
-      src={withBase('/images/home/home-hero-2.jpg')}
+    <Image
+      src={spectrumFeature}
       alt="Interior detail showing layered materials and color"
-      width="1600"
-      height="900"
+      format="webp"
+      quality={82}
+      loading="lazy"
+      decoding="async"
     />
   </div>
   <div class="home-spectrum__line">
@@ -106,10 +109,19 @@ import { withBase } from '../lib/paths';
 
   @media (max-width: 767px) {
     .home-spectrum__image {
+      position: relative;
+      left: 50%;
+      width: 100vw;
+      transform: translateX(-50%);
+    }
+
+    .home-spectrum__image {
       min-height: 55svh;
     }
 
     .home-spectrum__image img {
+      width: 100vw;
+      max-width: none;
       object-position: 50% 55%;
     }
 

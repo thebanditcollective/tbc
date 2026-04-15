@@ -24,10 +24,12 @@ const desktopNavItems = [
   { href: '/contact', label: 'Contact' }
 ];
 const mobileNavItems = [
+  { href: '/', label: 'Home' },
   { href: '/interiors', label: 'Interiors' },
   { href: '/services', label: 'Services' },
   { href: '/contact', label: 'Contact' }
 ];
+const instagramUrl = 'https://www.instagram.com/thebandit.collective';
 ---
 
 <!doctype html>
@@ -93,14 +95,16 @@ const mobileNavItems = [
     </main>
     <footer class="site-footer">
       <div class="shell site-footer__inner">
-        <div>
-          <p class="site-footer__brand">The Bandit Collective</p>
-          <p class="site-footer__copy">Interiors shaped with warmth, restraint, and story.</p>
-        </div>
-        <div class="site-footer__meta">
-          <a href="mailto:hello@thebanditcollective.com">hello@thebanditcollective.com</a>
-          <span>Brooklyn, New York</span>
-        </div>
+        <a class="site-footer__instagram" href={instagramUrl} target="_blank" rel="noreferrer">
+          <svg class="site-footer__instagram-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7" />
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7" />
+            <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+          </svg>
+          <span>Follow us on Instagram</span>
+        </a>
+        <span class="site-footer__divider" aria-hidden="true">|</span>
+        <p class="site-footer__copyright">&copy; 2025 Bandit Collective. All Rights Reserved.</p>
       </div>
     </footer>
 
@@ -110,6 +114,7 @@ const mobileNavItems = [
       const mobileMenu = document.querySelector('[data-mobile-menu]');
       const mobileLinks = mobileMenu ? mobileMenu.querySelectorAll('a') : [];
       const scrollRange = 180;
+      let menuCloseTimer;
 
       const syncHeader = () => {
         if (!header) return;
@@ -120,9 +125,12 @@ const mobileNavItems = [
 
       const closeMenu = () => {
         if (!toggle || !mobileMenu) return;
+        window.clearTimeout(menuCloseTimer);
         toggle.setAttribute('aria-expanded', 'false');
-        mobileMenu.setAttribute('hidden', '');
         header?.classList.remove('is-menu-open');
+        menuCloseTimer = window.setTimeout(() => {
+          mobileMenu.setAttribute('hidden', '');
+        }, 260);
       };
 
       toggle?.addEventListener('click', () => {
@@ -130,11 +138,13 @@ const mobileNavItems = [
         const expanded = toggle.getAttribute('aria-expanded') === 'true';
         toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
         if (expanded) {
-          mobileMenu.setAttribute('hidden', '');
-          header?.classList.remove('is-menu-open');
+          closeMenu();
         } else {
+          window.clearTimeout(menuCloseTimer);
           mobileMenu.removeAttribute('hidden');
-          header?.classList.add('is-menu-open');
+          window.requestAnimationFrame(() => {
+            header?.classList.add('is-menu-open');
+          });
         }
       });
 
@@ -200,8 +210,7 @@ const mobileNavItems = [
     margin: 0 auto;
   }
 
-  .site-header__brand,
-  .site-footer__brand {
+  .site-header__brand {
     font-family: var(--font-heading);
     font-size: clamp(1.88rem, 2.35vw, 2.34rem);
     line-height: 1;
@@ -290,7 +299,11 @@ const mobileNavItems = [
     width: 1.2rem;
     height: 1.5px;
     background: var(--color-text);
-    transition: background-color 280ms ease;
+    transform-origin: center;
+    transition:
+      background-color 280ms ease,
+      opacity 220ms ease,
+      transform 260ms var(--ease-luxury);
   }
 
   .site-main--offset {
@@ -298,48 +311,51 @@ const mobileNavItems = [
   }
 
   .site-footer {
-    padding: 2.5rem 0 3rem;
+    padding: 2rem 0;
     border-top: 1px solid var(--color-line);
   }
 
   .site-footer__inner {
     display: flex;
-    justify-content: space-between;
-    gap: 2rem;
-    align-items: end;
-  }
-
-  .site-footer__brand {
-    margin: 0 0 0.5rem;
-    font-size: 1.75rem;
-  }
-
-  .site-footer__copy,
-  .site-footer__meta {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    align-items: center;
     margin: 0;
     color: var(--color-muted);
     font-size: 0.95rem;
-    line-height: 1.7;
+    line-height: 1.5;
+    text-align: center;
   }
 
-  .site-footer__meta {
-    display: grid;
-    justify-items: end;
-    gap: 0.3rem;
-  }
-
-  .site-footer__meta a {
+  .site-footer__instagram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
     color: var(--color-text);
+    transition: color 220ms ease;
+  }
+
+  .site-footer__instagram:hover,
+  .site-footer__instagram:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .site-footer__instagram-icon {
+    flex: 0 0 auto;
+  }
+
+  .site-footer__divider {
+    color: var(--color-muted);
+  }
+
+  .site-footer__copyright {
+    margin: 0;
   }
 
   @media (max-width: 860px) {
     .site-footer__inner {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .site-footer__meta {
-      justify-items: start;
+      gap: 0.45rem 0.6rem;
     }
 
     .site-header__inner {
@@ -362,13 +378,38 @@ const mobileNavItems = [
       left: 0;
       right: 0;
       padding: 0 0 0.85rem;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid rgba(43, 43, 43, 0.08);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.75rem);
+      transition:
+        opacity 240ms ease,
+        transform 260ms var(--ease-luxury);
     }
 
     .site-header__mobile-panel[hidden] {
       display: none;
+    }
+
+    .site-header.is-menu-open .site-header__toggle span:not(.sr-only):nth-child(2) {
+      transform: translateY(calc(0.28rem + 1.5px)) rotate(45deg);
+    }
+
+    .site-header.is-menu-open .site-header__toggle span:not(.sr-only):nth-child(3) {
+      opacity: 0;
+      transform: scaleX(0.3);
+    }
+
+    .site-header.is-menu-open .site-header__toggle span:not(.sr-only):nth-child(4) {
+      transform: translateY(calc(-0.28rem - 1.5px)) rotate(-45deg);
+    }
+
+    .site-header.is-menu-open .site-header__mobile-panel {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
 
     .site-header__mobile-nav {
@@ -393,6 +434,20 @@ const mobileNavItems = [
   }
 
   @media (max-width: 560px) {
+    .site-footer__inner {
+      max-width: 22rem;
+    }
+
+    .site-footer__divider {
+      display: none;
+    }
+
+    .site-footer__instagram,
+    .site-footer__copyright {
+      flex-basis: 100%;
+      justify-content: center;
+    }
+
     .site-header__brand {
       max-width: none;
       font-size: 1.45rem;
