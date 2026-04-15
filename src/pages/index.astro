@@ -1,0 +1,234 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeContact from '../components/HomeContact.astro';
+import HomeLookbook from '../components/HomeLookbook.astro';
+import HomePressStrip from '../components/HomePressStrip.astro';
+import HomeSpectrumFeature from '../components/HomeSpectrumFeature.astro';
+import HomeStatement from '../components/HomeStatement.astro';
+import { withBase } from '../lib/paths';
+
+const desktopHeroImages = [
+  '/images/home/home-hero.jpg',
+  '/images/home/home-hero-v2.jpg',
+  '/images/home/home-hero-v3.jpg',
+  '/images/home/home-hero-v4.jpg'
+];
+
+const mobileHeroImages = [
+  '/images/home/home-hero-mobile.jpg',
+  '/images/home/home-hero-mobile-v2.jpg',
+  '/images/home/home-hero-mobile-v3.jpg',
+  '/images/home/home-hero-mobile-v4.jpg'
+];
+---
+
+<BaseLayout
+  title="The Bandit Collective | Interior Design Studio"
+  description="Editorial interior design portfolio and studio site for The Bandit Collective."
+  pathname="/"
+>
+  <section class="hero" data-home-hero>
+    <div class="hero__stack hero__stack--desktop" aria-hidden="true">
+      {desktopHeroImages.map((image, index) => (
+        <img
+          class:list={['hero__image', { 'is-active': index === 0 }]}
+          src={withBase(image)}
+          alt=""
+          width="1600"
+          height="1000"
+          loading={index === 0 ? 'eager' : 'lazy'}
+          data-home-hero-slide
+        />
+      ))}
+    </div>
+    <div class="hero__stack hero__stack--mobile" aria-hidden="true">
+      {mobileHeroImages.map((image, index) => (
+        <img
+          class:list={['hero__image', { 'is-active': index === 0 }]}
+          src={withBase(image)}
+          alt=""
+          width="1200"
+          height="1600"
+          loading={index === 0 ? 'eager' : 'lazy'}
+          data-home-hero-mobile-slide
+        />
+      ))}
+    </div>
+    <div class="bc-hero-arrow">
+      <a href="#statement" aria-label="Scroll to statement">
+        <svg width="20" height="32" viewBox="0 0 20 32" fill="none">
+          <path d="M10 6L10 26M10 26L4 20M10 26L16 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <div class="home-flow">
+    <HomeStatement />
+    <HomeLookbook />
+    <HomeSpectrumFeature />
+    <HomeContact />
+    <HomePressStrip />
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  const homeHero = document.querySelector('[data-home-hero]');
+
+  if (homeHero) {
+    const desktopSlides = Array.from(homeHero.querySelectorAll('[data-home-hero-slide]'));
+    const mobileSlides = Array.from(homeHero.querySelectorAll('[data-home-hero-mobile-slide]'));
+    const mobileQuery = window.matchMedia('(max-width: 720px)');
+    let activeIndex = 0;
+    let intervalId;
+
+    const getSlides = () => (mobileQuery.matches ? mobileSlides : desktopSlides);
+
+    const showHeroSlide = (index) => {
+      const slides = getSlides();
+      if (!slides.length) return;
+      activeIndex = index % slides.length;
+      desktopSlides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-active', !mobileQuery.matches && slideIndex === activeIndex);
+      });
+      mobileSlides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-active', mobileQuery.matches && slideIndex === activeIndex);
+      });
+    };
+
+    const startHeroRotation = () => {
+      window.clearInterval(intervalId);
+      intervalId = window.setInterval(() => {
+        showHeroSlide(activeIndex + 1);
+      }, 5000);
+    };
+
+    const pauseHeroRotation = () => window.clearInterval(intervalId);
+
+    homeHero.addEventListener('mouseenter', pauseHeroRotation);
+    homeHero.addEventListener('mouseleave', startHeroRotation);
+    mobileQuery.addEventListener('change', () => {
+      activeIndex = 0;
+      showHeroSlide(0);
+      startHeroRotation();
+    });
+
+    showHeroSlide(0);
+    startHeroRotation();
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    overflow: clip;
+    background: #e9dfd5;
+    opacity: 0;
+    animation: heroFadeIn 1600ms ease-out 120ms forwards;
+  }
+
+  .hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1600ms ease-in-out;
+  }
+
+  .hero__image.is-active {
+    opacity: 1;
+  }
+
+  .hero__stack {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero__stack--mobile {
+    display: none;
+  }
+
+  @keyframes heroFadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .bc-hero-arrow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .bc-hero-arrow a {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fdfbf7;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    pointer-events: auto;
+  }
+
+  .bc-hero-arrow a:hover {
+    opacity: 1;
+  }
+
+  .bc-hero-arrow svg {
+    animation: bcBounce 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  @keyframes bcBounce {
+    0%, 100% {
+      transform: translateY(0);
+      opacity: 0.75;
+    }
+
+    50% {
+      transform: translateY(8px);
+      opacity: 1;
+    }
+  }
+
+  .home-flow {
+    display: grid;
+    gap: var(--section-gap);
+    padding: clamp(4rem, 8vw, 7rem) 0 clamp(5rem, 9vw, 8rem);
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      height: 100dvh;
+      min-height: 0;
+      max-height: 100dvh;
+    }
+
+    .hero__image {
+      height: 100%;
+      min-height: 0;
+      max-height: 100dvh;
+    }
+
+    .hero__stack--desktop {
+      display: none;
+    }
+
+    .hero__stack--mobile {
+      display: block;
+    }
+
+    .home-flow {
+      gap: 2.5rem;
+      padding: 1.5rem 0 4rem;
+    }
+  }
+</style>

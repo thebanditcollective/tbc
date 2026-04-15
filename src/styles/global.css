@@ -1,0 +1,119 @@
+:root {
+  --color-bg: #fdfbf7;
+  --color-surface: #f7f1ea;
+  --color-text: #2b2b2b;
+  --color-muted: #746a64;
+  --color-accent: #c47a5a;
+  --color-line: rgba(43, 43, 43, 0.12);
+  --shadow-soft: 0 24px 80px rgba(43, 43, 43, 0.08);
+  --font-heading: "Cormorant Garamond", "Times New Roman", serif;
+  --font-body: "Manrope", "Helvetica Neue", sans-serif;
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
+  --page-pad: clamp(1.25rem, 2vw, 2rem);
+  --max-shell: 1600px;
+  --section-gap: clamp(4rem, 8vw, 7rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+main {
+  min-height: 100vh;
+}
+
+.shell {
+  width: min(calc(100% - (var(--page-pad) * 2)), var(--max-shell));
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.section-copy {
+  max-width: 48rem;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.35rem;
+  border: 1px solid rgba(196, 122, 90, 0.35);
+  border-radius: 999px;
+  transition:
+    transform 220ms var(--ease-luxury),
+    border-color 220ms ease,
+    color 220ms ease,
+    background-color 220ms ease;
+}
+
+.button-link:hover,
+.button-link:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--color-accent);
+  background: rgba(196, 122, 90, 0.08);
+  color: var(--color-accent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

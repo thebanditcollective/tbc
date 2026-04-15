@@ -1,0 +1,61 @@
+---
+type Outlet = {
+  name: string;
+  href?: string;
+};
+
+type Props = {
+  outlets: Outlet[];
+};
+
+const { outlets } = Astro.props;
+---
+
+<section class="press shell">
+  <p class="eyebrow">Press</p>
+  <div class="press__bar">
+    {outlets.map((outlet) => (
+      <a class="press__item" href={outlet.href ?? '#'} target={outlet.href ? '_blank' : undefined} rel="noreferrer">
+        {outlet.name}
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .press {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .press__bar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .press__item {
+    display: grid;
+    place-items: center;
+    min-height: 112px;
+    padding: 1.25rem;
+    border-radius: 1.4rem;
+    border: 1px solid rgba(43, 43, 43, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(247, 241, 234, 0.94));
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    transition: transform 220ms var(--ease-luxury), color 220ms ease;
+  }
+
+  .press__item:hover,
+  .press__item:focus-visible {
+    transform: translateY(-3px);
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 720px) {
+    .press__bar {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

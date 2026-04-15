@@ -1,0 +1,117 @@
+<!-- Bandit Collective: Intro Statement + Section Label -->
+<section class="bc-statement" id="statement">
+  <h2 class="bc-statement-text">Curating spaces that tell <em>your</em> story</h2>
+  
+  <p class="bc-statement-subline">
+    A NYC studio for the color-brave and story-rich. 
+    We steal the good parts from every era and make them yours.
+  </p>  
+</section>
+
+<style>
+  .bc-statement {
+    background: #FDFBF7; /* your existing color */
+    padding: 80px 8% 24px 8%; /* reduced bottom padding to hug scroll */
+    text-align: center;
+    overflow: hidden;
+  }
+  
+  .bc-statement-text,
+  .bc-statement-subline,
+  .bc-statement-label {
+    font-family: 'Cormorant Garamond', serif;
+    color: #2B2B2B;
+    margin-left: auto;
+    margin-right: auto;
+    /* Shared animation starting state */
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  
+  .bc-statement-text {
+    font-size: clamp(32px, 9vw, 48px);
+    line-height: 1.15;
+    max-width: 20ch;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  
+  .bc-statement-text em {
+    font-style: italic;
+    font-weight: 400;
+  }
+  
+  .bc-statement-subline {
+    font-size: clamp(18px, 3.5vw, 22px);
+    line-height: 1.5;
+    font-weight: 400;
+    max-width: 32ch;
+    margin-bottom: 40px;
+    color: #333;
+  }
+  
+  .bc-statement-label {
+    font-size: clamp(14px, 2.2vw, 16px);
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: #555;
+    margin-bottom: 0;
+  }
+  
+  /* Visible states with stagger */
+  .bc-statement-text.is-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition-delay: 0.15s;
+  }
+  
+  .bc-statement-subline.is-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition-delay: 0.35s; /* comes in after headline */
+  }
+  
+  .bc-statement-label.is-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition-delay: 0.55s; /* comes in last */
+  }
+  
+  @media (min-width: 768px) {
+    .bc-statement {
+      padding: 180px 5% 32px 5%; /* still tighter bottom on desktop */
+    }
+    .bc-statement-text {
+      font-size: clamp(36px, 6vw, 64px);
+    }
+    .bc-statement-subline {
+      margin-bottom: 56px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    const animatedEls = document.querySelectorAll(
+      '.bc-statement-text, .bc-statement-subline, .bc-statement-label'
+    );
+    if (!animatedEls.length) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { 
+      threshold: 0.4
+    });
+    
+    animatedEls.forEach(el => observer.observe(el));
+  })();
+</script>

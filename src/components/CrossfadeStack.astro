@@ -1,0 +1,69 @@
+---
+type ImageItem = {
+  src: string;
+  alt: string;
+};
+
+type Props = {
+  images: ImageItem[];
+  className?: string;
+  interval?: number;
+  fit?: 'cover' | 'contain';
+};
+
+const { images, className = '', interval = 4000, fit = 'cover' } = Astro.props;
+---
+
+<div class:list={['crossfade-stack', className]} data-crossfade-stack data-interval={interval}>
+  {images.map((image, index) => (
+    <img
+      src={image.src}
+      alt={image.alt}
+      loading={index === 0 ? 'eager' : 'lazy'}
+      class:list={['crossfade-stack__image', { 'is-active': index === 0 }]}
+      data-crossfade-image
+      style={`object-fit:${fit};`}
+    />
+  ))}
+</div>
+
+<script is:inline>
+  const stacks = document.querySelectorAll('[data-crossfade-stack]');
+
+  stacks.forEach((stack) => {
+    const frames = Array.from(stack.querySelectorAll('[data-crossfade-image]'));
+    if (frames.length <= 1) return;
+
+    const interval = Number(stack.getAttribute('data-interval')) || 4000;
+    let current = 0;
+
+    window.setInterval(() => {
+      frames[current]?.classList.remove('is-active');
+      current = (current + 1) % frames.length;
+      frames[current]?.classList.add('is-active');
+    }, interval);
+  });
+</script>
+
+<style>
+  .crossfade-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .crossfade-stack__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-position: center center;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease-luxury), transform 1.2s var(--ease-luxury);
+  }
+
+  .crossfade-stack__image.is-active {
+    opacity: 1;
+  }
+</style>

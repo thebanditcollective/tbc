@@ -1,0 +1,448 @@
+<!-- Bandit Collective - Lookbook Swipe v7 -->
+<section class="bc-lookbook" data-fullbleed="false">
+  <div class="bc-lookbook-inner">
+    <div class="bc-lookbook-viewport">
+      <!-- Prev button - shows after first scroll -->
+      <button class="bc-lookbook-prev" aria-label="Scroll to previous image">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Next button -->
+      <button class="bc-lookbook-next" aria-label="Scroll to next image">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path d="M12 8L20 16L12 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="bc-lookbook-track" id="bcLookbookTrack">
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_c177debde3a047b6b332fa965ed8acd4~mv2.jpg" alt="Living room redesign with oak millwork">
+          <div class="bc-lookbook-indicator">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_2b2309bcb85549b4a11a747497e3baf5~mv2.jpg" alt="Kitchen renovation with marble island">
+          <div class="bc-lookbook-indicator">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_54e691ae247e487e8df2721bc21c3469~mv2.jpg" alt="Primary bedroom with custom headboard">
+          <div class="bc-lookbook-indicator">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_88f563b6c75a40c28fa7a1a6aaedc51d~mv2.jpg" alt="Powder room with wallpaper detail">
+          <div class="bc-lookbook-indicator">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_4f008e47cac347d1a5d1b7b18fa19f4e~mv2.jpg" alt="Dining room with plaster pendant">
+          <div class="bc-lookbook-indicator">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bc-lookbook-card">
+          <img src="https://static.wixstatic.com/media/2a57e1_90ea401f2e944b128f276c511eb01875~mv2.jpg" alt="Entry foyer with limestone floor">
+        </div>
+
+        <div class="bc-lookbook-card bc-endcard">
+          <a href="/work" class="bc-endcard-link">
+            <div class="bc-endcard-content">
+              <span>See the complete story</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bc-lookbook-dots" id="bcLookbookDots"></div>
+
+    <div class="bc-lookbook-cta">
+      <a href="/work">Step inside the full collection</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Manrope:wght@400;600&display=swap');
+
+.bc-lookbook {
+    background: #FDFBF7;
+    color: #2B2B2B;
+    font-family: 'Manrope', sans-serif;
+    padding: 80px 0;
+  }
+
+.bc-lookbook[data-fullbleed="false"].bc-lookbook-inner {
+    padding-left: 8%;
+  }
+
+.bc-lookbook-header {
+    max-width: 1200px;
+    margin: 0 auto 32px auto;
+    padding-right: 8%;
+  }
+
+.bc-lookbook-header p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 3.5vw, 28px);
+    line-height: 1.4;
+    margin: 0;
+    opacity: 0.85;
+    max-width: 600px;
+  }
+
+.bc-lookbook-viewport {
+    position: relative;
+  }
+
+.bc-lookbook-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0 8% 16px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+.bc-lookbook-track::-webkit-scrollbar {
+    display: none;
+  }
+
+.bc-lookbook-card {
+    flex: 0 0 78vw;
+    scroll-snap-align: start;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.3s ease;
+  }
+
+.bc-lookbook-card:not(.is-active) {
+    opacity: 0.65;
+  }
+
+.bc-lookbook-card.is-active {
+    opacity: 1;
+  }
+
+.bc-lookbook-card img {
+    width: 100%;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+.bc-lookbook-indicator {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 4px 0 0;
+    color: #C47A5A;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+.bc-lookbook-card.is-active.bc-lookbook-indicator {
+    opacity: 0.7;
+  }
+
+.bc-lookbook-card:last-child.bc-lookbook-indicator,
+.bc-endcard.bc-lookbook-indicator {
+    display: none;
+  }
+
+  @keyframes bcNudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+  }
+
+.bc-lookbook-indicator svg {
+    animation: bcNudge 3.5s ease-in-out infinite;
+  }
+
+.bc-endcard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #EAE6E1;
+    aspect-ratio: 4/5;
+  }
+
+.bc-endcard-link {
+    text-decoration: none;
+    color: #2B2B2B;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.bc-endcard-content {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+.bc-endcard-content svg {
+    color: #C47A5A;
+  }
+
+.bc-lookbook-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 24px 0 48px 0;
+    padding-right: 8%;
+  }
+
+.bc-lookbook-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2B2B2B;
+    opacity: 0.2;
+    transition: all 0.3s ease;
+  }
+
+.bc-lookbook-dot.active {
+    opacity: 0.8;
+    transform: scale(1.3);
+  }
+
+.bc-lookbook-cta {
+    text-align: center;
+    padding-right: 8%;
+  }
+
+.bc-lookbook-cta a {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 20px;
+    text-decoration: none;
+    color: #2B2B2B;
+    border-bottom: 1px solid #C47A5A;
+    padding-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+
+.bc-lookbook-cta a:hover {
+    color: #C47A5A;
+  }
+
+  /* Desktop arrows - faint by default, visible on hover */
+  @media (min-width: 768px) {
+  .bc-lookbook {
+      padding: 120px 0;
+    }
+  .bc-lookbook-inner {
+      padding-left: 5%;
+    }
+  .bc-lookbook-header {
+      padding-right: 5%;
+    }
+  .bc-lookbook-card {
+      flex: 0 0 380px;
+      opacity: 1!important;
+    }
+  .bc-lookbook-card:hover img {
+      transform: scale(1.02);
+    }
+  .bc-lookbook-indicator {
+      display: none;
+    }
+  .bc-lookbook-cta {
+      padding-right: 5%;
+      text-align: left;
+    }
+  .bc-lookbook-cta a {
+      font-size: 22px;
+    }
+
+    /* Arrow base styles */
+  .bc-lookbook-prev,
+  .bc-lookbook-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      background: rgba(253, 251, 247, 0.6);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(43, 43, 43, 0.1);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.35; /* faint but visible */
+      transition: opacity 0.3s ease, background 0.2s ease, border-color 0.2s ease;
+      z-index: 3;
+      padding: 0;
+    }
+
+  .bc-lookbook-prev {
+      left: 24px;
+    }
+
+  .bc-lookbook-next {
+      right: 24px;
+    }
+
+  .bc-lookbook-prev:hover,
+  .bc-lookbook-next:hover {
+      opacity: 1;
+      background: rgba(253, 251, 247, 0.95);
+      border-color: rgba(43, 43, 43, 0.2);
+    }
+
+  .bc-lookbook-prev svg,
+  .bc-lookbook-next svg {
+      color: #2B2B2B;
+      opacity: 0.8;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+  .bc-lookbook-prev:hover svg {
+      transform: translateX(-2px);
+      opacity: 1;
+    }
+
+  .bc-lookbook-next:hover svg {
+      transform: translateX(2px);
+      opacity: 1;
+    }
+
+    /* Hide arrows when at start/end */
+  .bc-lookbook-prev.is-hidden,
+  .bc-lookbook-next.is-hidden {
+      opacity: 0!important;
+      pointer-events: none;
+    }
+  }
+
+  @media (min-width: 1200px) {
+  .bc-lookbook-card {
+      flex: 0 0 420px;
+    }
+  }
+
+  /* Hide arrows on mobile */
+  @media (max-width: 767px) {
+  .bc-lookbook-prev,
+  .bc-lookbook-next {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    const track = document.getElementById('bcLookbookTrack');
+    const cards = track.querySelectorAll('.bc-lookbook-card');
+    const dotsContainer = document.getElementById('bcLookbookDots');
+    const prevBtn = document.querySelector('.bc-lookbook-prev');
+    const nextBtn = document.querySelector('.bc-lookbook-next');
+    let hasSwiped = false;
+
+    // Create dots
+    cards.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'bc-lookbook-dot';
+      if (i === 0) dot.classList.add('active');
+      dotsContainer.appendChild(dot);
+    });
+    const dots = dotsContainer.querySelectorAll('.bc-lookbook-dot');
+
+    function updateActive() {
+      let activeIndex = 0;
+      let minDiff = Infinity;
+
+      cards.forEach((card, i) => {
+        const rect = card.getBoundingClientRect();
+        const trackRect = track.getBoundingClientRect();
+        const diff = Math.abs(rect.left - trackRect.left);
+        if (diff < minDiff) {
+          minDiff = diff;
+          activeIndex = i;
+        }
+      });
+
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === activeIndex));
+      dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
+
+      // Hide mobile indicator after first swipe
+      if (!hasSwiped && activeIndex > 0) {
+        hasSwiped = true;
+        document.querySelectorAll('.bc-lookbook-indicator svg').forEach(svg => {
+          svg.style.animation = 'none';
+        });
+        document.querySelectorAll('.bc-lookbook-indicator').forEach(ind => {
+          ind.style.transition = 'opacity 0.4s ease';
+          ind.style.opacity = '0';
+        });
+      }
+
+      // Desktop arrow visibility
+      if (prevBtn && nextBtn) {
+        const isAtStart = track.scrollLeft < 10;
+        const isAtEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
+
+        prevBtn.classList.toggle('is-hidden', isAtStart);
+        nextBtn.classList.toggle('is-hidden', isAtEnd);
+      }
+    }
+
+    // Scroll one card width on arrow click
+    function scrollByCard(direction) {
+      const cardWidth = cards[0].offsetWidth + 12; // card + gap
+      track.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => scrollByCard(-1));
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => scrollByCard(1));
+    }
+
+    track.addEventListener('scroll', () => {
+      window.requestAnimationFrame(updateActive);
+    });
+
+    // Init
+    updateActive();
+  })();
+</script>

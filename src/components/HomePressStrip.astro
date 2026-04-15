@@ -1,0 +1,95 @@
+---
+import { withBase } from '../lib/paths';
+
+const logos = [
+  {
+    src: withBase('/images/press/Veranda-logo.png'),
+    alt: 'Veranda'
+  },
+  {
+    src: withBase('/images/press/adpro_logo.png'),
+    alt: 'Architectural Digest AD Pro'
+  },
+  {
+    src: withBase('/images/press/CG_Logo_BLACK-site.jpg'),
+    alt: 'Cottage & Gardens'
+  }
+];
+---
+
+<section class="home-press">
+  <div class="home-press__inner shell">
+    <p class="home-press__label">As seen in</p>
+    <div class="home-press__logos">
+      {logos.map((logo) => (
+        <img src={logo.src} alt={logo.alt} loading="lazy" />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .home-press {
+    background: var(--color-bg);
+    padding: 3.5rem 0 4rem;
+  }
+
+  .home-press__inner {
+    text-align: center;
+  }
+
+  .home-press__label {
+    margin: 0 0 1.75rem;
+    color: rgba(43, 43, 43, 0.4);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .home-press__logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(2.5rem, 8vw, 5rem);
+  }
+
+  .home-press__logos img {
+    width: auto;
+    max-width: 8.75rem;
+    height: 1.75rem;
+    object-fit: contain;
+    filter: grayscale(100%);
+    opacity: 0.35;
+    transition:
+      filter 280ms ease,
+      opacity 280ms ease;
+  }
+
+  .home-press__logos img:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+
+  @media (max-width: 767px) {
+    .home-press {
+      padding: 3rem 0 3.5rem;
+    }
+
+    .home-press__label {
+      margin-bottom: 1.5rem;
+      font-size: 0.75rem;
+    }
+
+    .home-press__logos {
+      gap: 2rem;
+    }
+
+    .home-press__logos img {
+      max-width: 6.875rem;
+      height: 1.375rem;
+      opacity: 0.45;
+    }
+  }
+</style>

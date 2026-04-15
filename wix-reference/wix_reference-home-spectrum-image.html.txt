@@ -1,0 +1,149 @@
+<!-- Bandit Collective - Spectrum Hero v4 -->
+<section class="bc-spectrum-hero">
+  <div class="bc-spectrum-image">
+    <img src="https://static.wixstatic.com/media/2a57e1_bbc9c0206b4a4f5f81d3229fa9620833~mv2.jpg" alt="Interior detail showing layered materials and color">
+  </div>
+  <div class="bc-spectrum-line">
+    <div class="bc-spectrum-text">
+      <span class="bc-spectrum-left">From the first color</span>
+      <span class="bc-spectrum-arrow">
+        <svg width="100%" height="2" viewBox="0 0 200 2" preserveAspectRatio="none">
+          <line x1="0" y1="1" x2="195" y2="1" stroke="currentColor" stroke-width="1"/>
+          <path d="M195 1 L200 1 L195 1" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="bc-spectrum-right">to the final detail</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Manrope:wght@400;600&display=swap');
+
+  /* Full-bleed wrapper for all screen sizes */
+  .bc-spectrum-hero {
+    background: #FDFBF7 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: 'Manrope', sans-serif !important;
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+  }
+
+  .bc-spectrum-image {
+    width: 100vw !important;
+    height: 85vh !important;
+    max-height: 900px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .bc-spectrum-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 40% !important;
+    display: block !important;
+  }
+
+  .bc-spectrum-line {
+    background: #FDFBF7 !important;
+    padding: 72px 0 88px 0 !important;
+    width: 100% !important;
+  }
+
+  .bc-spectrum-text {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 8% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 24px !important;
+  }
+
+  .bc-spectrum-left,
+  .bc-spectrum-right {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(24px, 3.5vw, 38px) !important;
+    line-height: 1.2 !important;
+    color: #2B2B2B !important;
+    letter-spacing: -0.01em !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .bc-spectrum-arrow {
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+    max-width: 240px !important;
+    height: 2px !important;
+    color: #C47A5A !important;
+    opacity: 0.7 !important;
+    animation: bcArrowDraw 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both !important;
+  }
+
+  .bc-spectrum-arrow svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  @keyframes bcArrowDraw {
+    from {
+      clip-path: inset(0 100% 0 0);
+      opacity: 0;
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      opacity: 0.7;
+    }
+  }
+
+  /* Mobile: keep bleed, adjust height and crop */
+  @media (max-width: 767px) {
+    .bc-spectrum-image {
+      height: 55vh !important;
+      min-height: 420px !important;
+    }
+    
+    .bc-spectrum-image img {
+      object-position: 50% 55% !important; /* Adjust this to favor your sofa */
+    }
+    
+    .bc-spectrum-line {
+      padding: 56px 0 64px 0 !important;
+    }
+    .bc-spectrum-text {
+      padding: 0 6% !important;
+      gap: 16px !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+    }
+    .bc-spectrum-left,
+    .bc-spectrum-right {
+      font-size: clamp(22px, 6vw, 28px) !important;
+      white-space: normal !important;
+      text-align: center !important;
+      flex-basis: 100% !important;
+    }
+    .bc-spectrum-arrow {
+      order: 2 !important;
+      max-width: 160px !important;
+      margin: 8px 0 !important;
+    }
+    .bc-spectrum-left {
+      order: 1 !important;
+    }
+    .bc-spectrum-right {
+      order: 3 !important;
+    }
+  }
+</style>

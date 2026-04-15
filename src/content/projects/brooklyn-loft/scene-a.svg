@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#d8c8b9" />
+  <rect x="180" y="120" width="520" height="700" rx="28" fill="#f6efe6" />
+  <rect x="820" y="170" width="540" height="560" rx="28" fill="#b77759" opacity="0.44" />
+  <text x="180" y="910" fill="#60463a" font-family="Georgia, serif" font-size="96">Brooklyn Loft</text>
+</svg>

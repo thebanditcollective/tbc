@@ -1,0 +1,195 @@
+---
+const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
+---
+
+<section class="home-contact" id="contact">
+  <div class="home-contact__inner">
+    <h2 class="home-contact__title">Start your story</h2>
+
+    <form class="home-contact__form" data-home-contact-form data-endpoint={endpoint}>
+      <div class="home-contact__field">
+        <input type="text" name="name" placeholder="Name" autocomplete="name" required />
+      </div>
+
+      <div class="home-contact__field">
+        <input type="email" name="email" placeholder="Email" autocomplete="email" required />
+      </div>
+
+      <div class="home-contact__field">
+        <input type="tel" name="phone" placeholder="Phone, optional" autocomplete="tel" />
+      </div>
+
+      <div class="home-contact__field home-contact__field--textarea">
+        <textarea name="message" rows="4" placeholder="Tell us about your space" required></textarea>
+      </div>
+
+      <div class="home-contact__actions">
+        <button type="submit" class="home-contact__submit">
+          <span>Send it our way</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+        <p class="home-contact__status" data-home-contact-status>
+          {endpoint
+            ? 'We will follow up after submission.'
+            : 'Add PUBLIC_FORMSPREE_ENDPOINT to activate this form.'}
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script is:inline>
+  const contactForms = document.querySelectorAll('[data-home-contact-form]');
+
+  contactForms.forEach((form) => {
+    const endpoint = form.getAttribute('data-endpoint');
+    const status = form.querySelector('[data-home-contact-status]');
+    const submitter = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!endpoint) {
+        if (status) status.textContent = 'This form is ready, but it needs a Formspree endpoint before launch.';
+        return;
+      }
+
+      submitter?.setAttribute('disabled', 'true');
+      if (status) status.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form)
+        });
+
+        if (!response.ok) throw new Error('Submission failed');
+        form.reset();
+        if (status) status.textContent = "Sent. We'll be in touch!";
+      } catch (error) {
+        if (status) status.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
+      } finally {
+        submitter?.removeAttribute('disabled');
+      }
+    });
+  });
+</script>
+
+<style>
+  .home-contact {
+    background: var(--color-bg);
+    padding: clamp(5rem, 8vw, 6.25rem) 0 clamp(5rem, 9vw, 6.25rem);
+  }
+
+  .home-contact__inner {
+    width: min(calc(100% - (var(--page-pad) * 2)), 40rem);
+    margin: 0 auto;
+  }
+
+  .home-contact__title {
+    margin: 0 0 3rem;
+    color: var(--color-text);
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .home-contact__form {
+    display: block;
+  }
+
+  .home-contact__field {
+    margin-bottom: 2rem;
+  }
+
+  .home-contact__field input,
+  .home-contact__field textarea {
+    width: 100%;
+    padding: 0.75rem 0;
+    border: 0;
+    border-bottom: 1px solid rgba(43, 43, 43, 0.2);
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: border-color 220ms ease, padding-bottom 220ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .home-contact__field input::placeholder,
+  .home-contact__field textarea::placeholder {
+    color: rgba(43, 43, 43, 0.5);
+    opacity: 1;
+  }
+
+  .home-contact__field input:focus,
+  .home-contact__field textarea:focus {
+    outline: none;
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: calc(0.75rem - 1px);
+  }
+
+  .home-contact__field textarea {
+    min-height: 6.25rem;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .home-contact__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .home-contact__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0 0.5rem;
+    border: 0;
+    border-bottom: 1px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-style: italic;
+    transition: color 220ms ease, gap 220ms var(--ease-luxury);
+  }
+
+  .home-contact__submit:hover,
+  .home-contact__submit:focus-visible {
+    color: var(--color-accent);
+    gap: 0.75rem;
+  }
+
+  .home-contact__submit[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  .home-contact__status {
+    margin: 0;
+    color: rgba(43, 43, 43, 0.6);
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 767px) {
+    .home-contact__title {
+      margin-bottom: 2.5rem;
+    }
+
+    .home-contact__submit {
+      justify-content: center;
+      width: 100%;
+    }
+  }
+</style>

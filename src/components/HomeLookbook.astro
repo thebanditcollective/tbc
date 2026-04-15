@@ -1,0 +1,670 @@
+---
+import { withBase } from '../lib/paths';
+
+const slides = [
+  {
+    src: withBase('/images/home/home carousel/ClintonStreet_012.jpg'),
+    alt: 'Living room redesign with oak millwork'
+  },
+  {
+    src: withBase('/images/home/home carousel/ClintonStreet_312A.jpg'),
+    alt: 'Kitchen renovation with marble island'
+  },
+  {
+    src: withBase('/images/home/home carousel/DSC_3061-1.jpg'),
+    alt: 'Primary bedroom with custom headboard'
+  },
+  {
+    src: withBase('/images/home/home carousel/DSC_3078-3.jpg'),
+    alt: 'Powder room with wallpaper detail'
+  },
+  {
+    src: withBase('/images/home/home carousel/DSC_3116-1.jpg'),
+    alt: 'Dining room with plaster pendant'
+  },
+  {
+    src: withBase('/images/home/home carousel/DSC_3251-1 crop.jpg'),
+    alt: 'Entry foyer with limestone floor'
+  }
+];
+---
+
+<section class="home-lookbook">
+  <div class="home-lookbook__inner">
+    <div class="home-lookbook__viewport" data-home-lookbook>
+      <button class="home-lookbook__arrow home-lookbook__arrow--prev" type="button" aria-label="Scroll to previous image" data-home-lookbook-prev>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button class="home-lookbook__arrow home-lookbook__arrow--next" type="button" aria-label="Scroll to next image" data-home-lookbook-next>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M12 8L20 16L12 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <div class="home-lookbook__track" data-home-lookbook-track tabindex="0" aria-label="Project image carousel">
+        {slides.map((slide, index) => (
+          <article class:list={['home-lookbook__card', { 'is-active': index === 0 }]} data-home-lookbook-card>
+            <img
+              class="carousel-img"
+              src={slide.src}
+              alt={slide.alt}
+              loading={index < 2 ? 'eager' : 'lazy'}
+              width="1200"
+              height="1500"
+              data-lookbook-lightbox-index={index}
+              data-lookbook-lightbox-trigger
+            />
+            {index < slides.length - 1 && (
+              <div class="home-lookbook__indicator" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </div>
+            )}
+          </article>
+        ))}
+
+        <article class="home-lookbook__card home-lookbook__card--end" data-home-lookbook-card>
+          <div class="home-lookbook__end-content">
+            <span>See the complete story</span>
+            <a class="home-lookbook__end-arrow" href={withBase('/interiors')} aria-label="View interiors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="home-lookbook__dots" data-home-lookbook-dots>
+      {[...slides, null].map((_, index) => (
+        <button
+          class:list={['home-lookbook__dot', { 'is-active': index === 0 }]}
+          type="button"
+          aria-label={`Go to slide ${index + 1}`}
+          data-home-lookbook-dot
+        ></button>
+      ))}
+    </div>
+
+    <div class="home-lookbook__cta">
+      <a href={withBase('/interiors')}>Step inside the full collection</a>
+    </div>
+  </div>
+
+  <div class="home-lookbook-lightbox" data-lookbook-lightbox aria-hidden="true">
+    <button
+      class="home-lookbook-lightbox__arrow home-lookbook-lightbox__arrow--prev"
+      type="button"
+      aria-label="View previous image"
+      data-lookbook-lightbox-prev
+    >
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+    <img src="" alt="" data-lookbook-lightbox-image />
+    <button
+      class="home-lookbook-lightbox__arrow home-lookbook-lightbox__arrow--next"
+      type="button"
+      aria-label="View next image"
+      data-lookbook-lightbox-next
+    >
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M12 8L20 16L12 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+</section>
+
+<script is:inline>
+  const lookbookLightbox = document.querySelector('[data-lookbook-lightbox]');
+  const lookbookLightboxImage = lookbookLightbox?.querySelector('[data-lookbook-lightbox-image]');
+  const lookbookLightboxPrev = lookbookLightbox?.querySelector('[data-lookbook-lightbox-prev]');
+  const lookbookLightboxNext = lookbookLightbox?.querySelector('[data-lookbook-lightbox-next]');
+  const lookbookLightboxTriggers = Array.from(document.querySelectorAll('[data-lookbook-lightbox-trigger]'));
+  let lookbookLightboxIndex = 0;
+  let lookbookTouchStartX = 0;
+
+  const syncLookbookLightbox = () => {
+    if (!lookbookLightbox || !lookbookLightboxImage) return;
+    const trigger = lookbookLightboxTriggers[lookbookLightboxIndex];
+    if (!trigger) return;
+
+    lookbookLightboxImage.setAttribute('src', trigger.currentSrc || trigger.getAttribute('src') || '');
+    lookbookLightboxImage.setAttribute('alt', trigger.getAttribute('alt') || '');
+    lookbookLightboxPrev?.classList.toggle('is-hidden', lookbookLightboxIndex === 0);
+    lookbookLightboxNext?.classList.toggle('is-hidden', lookbookLightboxIndex === lookbookLightboxTriggers.length - 1);
+  };
+
+  const closeLookbookLightbox = () => {
+    document.body.classList.remove('has-lookbook-lightbox');
+    lookbookLightbox?.setAttribute('aria-hidden', 'true');
+    if (lookbookLightboxImage) {
+      lookbookLightboxImage.removeAttribute('src');
+      lookbookLightboxImage.removeAttribute('alt');
+    }
+  };
+
+  const moveLookbookLightbox = (direction) => {
+    const nextIndex = Math.max(0, Math.min(lookbookLightboxTriggers.length - 1, lookbookLightboxIndex + direction));
+    if (nextIndex === lookbookLightboxIndex) return;
+    lookbookLightboxIndex = nextIndex;
+    syncLookbookLightbox();
+  };
+
+  lookbookLightboxTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      if (!lookbookLightbox || !lookbookLightboxImage) return;
+      lookbookLightboxIndex = Number(trigger.getAttribute('data-lookbook-lightbox-index')) || 0;
+      syncLookbookLightbox();
+      lookbookLightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('has-lookbook-lightbox');
+    });
+  });
+
+  lookbookLightbox?.addEventListener('click', (event) => {
+    if (event.target === lookbookLightbox) closeLookbookLightbox();
+  });
+
+  lookbookLightboxPrev?.addEventListener('click', () => moveLookbookLightbox(-1));
+  lookbookLightboxNext?.addEventListener('click', () => moveLookbookLightbox(1));
+
+  lookbookLightbox?.addEventListener('touchstart', (event) => {
+    lookbookTouchStartX = event.changedTouches[0]?.clientX ?? 0;
+  }, { passive: true });
+
+  lookbookLightbox?.addEventListener('touchend', (event) => {
+    const touchEndX = event.changedTouches[0]?.clientX ?? 0;
+    const deltaX = touchEndX - lookbookTouchStartX;
+    if (Math.abs(deltaX) < 45) return;
+    moveLookbookLightbox(deltaX < 0 ? 1 : -1);
+  }, { passive: true });
+
+  window.addEventListener('keydown', (event) => {
+    if (!document.body.classList.contains('has-lookbook-lightbox')) return;
+    if (event.key === 'Escape') {
+      closeLookbookLightbox();
+    } else if (event.key === 'ArrowLeft') {
+      moveLookbookLightbox(-1);
+    } else if (event.key === 'ArrowRight') {
+      moveLookbookLightbox(1);
+    }
+  });
+
+  const lookbooks = document.querySelectorAll('[data-home-lookbook]');
+
+  lookbooks.forEach((lookbook) => {
+    const track = lookbook.querySelector('[data-home-lookbook-track]');
+    const cards = Array.from(lookbook.querySelectorAll('[data-home-lookbook-card]'));
+    const prevButton = lookbook.querySelector('[data-home-lookbook-prev]');
+    const nextButton = lookbook.querySelector('[data-home-lookbook-next]');
+    const dotsContainer = lookbook.parentElement?.querySelector('[data-home-lookbook-dots]');
+    const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-home-lookbook-dot]')) : [];
+    let hasSwiped = false;
+    let activeIndex = 0;
+    let wheelLocked = false;
+
+    if (!track || !cards.length || !dots.length) return;
+
+    const getMaxOffset = () => {
+      const lastCard = cards[cards.length - 1];
+      const viewportWidth = lookbook.clientWidth;
+      return Math.max(0, lastCard.offsetLeft + lastCard.offsetWidth - viewportWidth);
+    };
+
+    const getLastReachableIndex = () => {
+      const maxOffset = getMaxOffset();
+      const index = cards.findIndex((card) => card.offsetLeft - cards[0].offsetLeft >= maxOffset - 1);
+      return index === -1 ? cards.length - 1 : index;
+    };
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        scrollToCard(index);
+      });
+    });
+
+    const update = () => {
+      cards.forEach((card, index) => card.classList.toggle('is-active', index === activeIndex));
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('is-active', index === activeIndex);
+      });
+
+      if (!hasSwiped && activeIndex > 0) {
+        hasSwiped = true;
+        lookbook.querySelectorAll('.home-lookbook__indicator').forEach((indicator) => {
+          indicator.classList.add('is-dismissed');
+        });
+      }
+
+      if (prevButton && nextButton) {
+        prevButton.classList.toggle('is-hidden', activeIndex === 0);
+        nextButton.classList.toggle('is-hidden', activeIndex >= getLastReachableIndex());
+      }
+    };
+
+    const scrollByCard = (direction) => {
+      const nextIndex = Math.max(0, Math.min(getLastReachableIndex(), activeIndex + direction));
+      scrollToCard(nextIndex);
+    };
+
+    const scrollToCard = (index) => {
+      activeIndex = Math.max(0, Math.min(getLastReachableIndex(), index));
+      const offset = cards[activeIndex].offsetLeft - cards[0].offsetLeft;
+      track.style.transform = `translateX(-${Math.min(offset, getMaxOffset())}px)`;
+      update();
+    };
+
+    const handleWheel = (event) => {
+      const isHorizontalGesture = Math.abs(event.deltaX) > Math.abs(event.deltaY) * 1.2;
+      if (!isHorizontalGesture || Math.abs(event.deltaX) < 18) return;
+
+      const isMovingForward = event.deltaX > 0;
+      const isAtStart = activeIndex === 0;
+      const isAtEnd = activeIndex >= getLastReachableIndex();
+
+      if ((isMovingForward && isAtEnd) || (!isMovingForward && isAtStart)) return;
+
+      event.preventDefault();
+      if (wheelLocked) return;
+
+      wheelLocked = true;
+      scrollByCard(isMovingForward ? 1 : -1);
+      window.setTimeout(() => {
+        wheelLocked = false;
+      }, 520);
+    };
+
+    prevButton?.addEventListener('click', () => scrollByCard(-1));
+    nextButton?.addEventListener('click', () => scrollByCard(1));
+    lookbook.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('resize', () => scrollToCard(activeIndex));
+
+    update();
+  });
+</script>
+
+<style>
+  .home-lookbook {
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: calc(100svh - 94px);
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .home-lookbook__inner {
+    display: grid;
+    align-content: start;
+    min-height: calc(100svh - 94px);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 0 1.25rem;
+  }
+
+  .home-lookbook__viewport {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .home-lookbook__track {
+    display: flex;
+    gap: 0.875rem;
+    width: 100%;
+    padding: 0 clamp(0.625rem, 0.55vw, 0.875rem) 1rem clamp(1.25rem, 5.35vw, 6.5rem);
+    will-change: transform;
+    transition: transform 520ms var(--ease-luxury);
+  }
+
+  .home-lookbook__card {
+    flex: 0 0 min(28vw, 32.875rem);
+    scroll-snap-align: start;
+    opacity: 0.65;
+    transition: opacity 280ms ease;
+  }
+
+  .home-lookbook__card.is-active,
+  .home-lookbook__card--end {
+    opacity: 1;
+  }
+
+  .home-lookbook__card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    height: min(77svh, 41rem);
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+    background: #eae6e1;
+    transition: transform 600ms var(--ease-luxury);
+  }
+
+  .home-lookbook-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    place-items: center;
+    padding: 5vh 5vw;
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .home-lookbook-lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    z-index: 1;
+  }
+
+  .home-lookbook-lightbox__arrow {
+    position: fixed;
+    top: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fdfbf7;
+    opacity: 0.75;
+    transform: translateY(-50%);
+    transition:
+      opacity 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .home-lookbook-lightbox__arrow:hover,
+  .home-lookbook-lightbox__arrow:focus-visible {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+
+  .home-lookbook-lightbox__arrow--prev {
+    left: clamp(1rem, 4vw, 3rem);
+  }
+
+  .home-lookbook-lightbox__arrow--next {
+    right: clamp(1rem, 4vw, 3rem);
+  }
+
+  .home-lookbook-lightbox__arrow.is-hidden {
+    display: none;
+  }
+
+  :global(body.has-lookbook-lightbox) {
+    overflow: hidden;
+  }
+
+  :global(body.has-lookbook-lightbox) .home-lookbook-lightbox {
+    display: grid;
+  }
+
+  .home-lookbook__indicator {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 0.25rem 0 0;
+    color: var(--color-accent);
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .home-lookbook__card.is-active .home-lookbook__indicator {
+    opacity: 0.72;
+  }
+
+  .home-lookbook__indicator svg {
+    animation: homeLookbookNudge 3.5s ease-in-out infinite;
+  }
+
+  .home-lookbook__indicator.is-dismissed {
+    opacity: 0;
+  }
+
+  .home-lookbook__card--end {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    aspect-ratio: 4 / 5;
+    height: min(77svh, 41rem);
+    background: #eae6e1;
+  }
+
+  .home-lookbook__end-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    min-height: 100%;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .home-lookbook__end-arrow {
+    display: inline-flex;
+    color: var(--color-accent);
+    transition: transform 220ms var(--ease-luxury);
+  }
+
+  .home-lookbook__end-arrow:hover,
+  .home-lookbook__end-arrow:focus-visible {
+    transform: translateX(4px);
+  }
+
+  .home-lookbook__end-arrow svg {
+    color: var(--color-accent);
+  }
+
+  .home-lookbook__dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.72rem;
+    width: 100%;
+    margin: 1.85rem auto 1.65rem;
+    padding: 0;
+  }
+
+  .home-lookbook__dot {
+    display: block;
+    flex: 0 0 auto;
+    width: 0.55rem;
+    height: 0.55rem;
+    min-width: 0.55rem;
+    min-height: 0.55rem;
+    max-width: 0.55rem;
+    max-height: 0.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(43, 43, 43, 0.24);
+    color: transparent;
+    cursor: pointer;
+    font-size: 0;
+    line-height: 0;
+    overflow: hidden;
+    appearance: none;
+    transition:
+      transform 220ms ease,
+      background-color 220ms ease,
+      opacity 220ms ease;
+  }
+
+  .home-lookbook__dot.is-active {
+    background: rgba(43, 43, 43, 0.74);
+    opacity: 1;
+    transform: scale(1.18);
+  }
+
+  .home-lookbook__cta {
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+  }
+
+  .home-lookbook__cta a {
+    display: inline-block;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-style: italic;
+    line-height: 1.2;
+    transition: color 220ms ease, border-color 220ms ease;
+  }
+
+  .home-lookbook__cta a:hover,
+  .home-lookbook__cta a:focus-visible {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .home-lookbook__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 3.125rem;
+    height: 3.125rem;
+    padding: 0;
+    border: 1px solid rgba(43, 43, 43, 0.08);
+    border-radius: 999px;
+    background: rgba(253, 251, 247, 0.52);
+    backdrop-filter: blur(6px);
+    color: var(--color-text);
+    opacity: 0.38;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition:
+      opacity 220ms ease,
+      background-color 220ms ease,
+      border-color 220ms ease;
+  }
+
+  .home-lookbook__arrow--prev {
+    left: 1.25rem;
+  }
+
+  .home-lookbook__arrow--next {
+    right: 1.25rem;
+  }
+
+  .home-lookbook__arrow:hover,
+  .home-lookbook__arrow:focus-visible {
+    opacity: 1;
+    background: rgba(253, 251, 247, 0.92);
+    border-color: rgba(43, 43, 43, 0.22);
+  }
+
+  .home-lookbook__arrow.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @keyframes homeLookbookNudge {
+    0%, 100% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(4px);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .home-lookbook__card {
+      flex-basis: min(28vw, 32.875rem);
+      opacity: 1;
+    }
+
+    .home-lookbook__indicator {
+      display: none;
+    }
+
+    .home-lookbook__cta {
+      text-align: center;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .carousel-img {
+      cursor: pointer;
+      transition:
+        transform 200ms ease-out,
+        box-shadow 200ms ease-out;
+    }
+
+    .home-lookbook__card:hover {
+      position: relative;
+      z-index: 1;
+    }
+
+    .carousel-img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .home-lookbook__card {
+      flex-basis: min(28vw, 32.875rem);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .home-lookbook,
+    .home-lookbook__inner {
+      min-height: auto;
+    }
+
+    .home-lookbook__inner {
+      padding: 0 0 1rem;
+    }
+
+    .home-lookbook__track {
+      padding-left: 0;
+      gap: 0.5rem;
+    }
+
+    .home-lookbook__card {
+      flex-basis: 89vw;
+    }
+
+    .home-lookbook__card img,
+    .home-lookbook__card--end {
+      height: min(58dvh, 30rem);
+    }
+
+    .home-lookbook__arrow {
+      display: none;
+    }
+
+    .home-lookbook__dots {
+      gap: 0.6rem;
+      margin: 0.8rem auto 1rem;
+    }
+
+    .home-lookbook__indicator {
+      display: none;
+    }
+
+    .home-lookbook__cta a {
+      font-size: 1.2rem;
+    }
+  }
+</style>

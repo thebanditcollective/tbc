@@ -1,0 +1,178 @@
+---
+const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
+---
+
+<section class="contact shell" id="inquire">
+  <div class="contact__intro">
+    <p class="eyebrow">Start A Conversation</p>
+    <h2 class="section-title">Tell us what home should feel like next.</h2>
+    <p class="section-copy">
+      Whether you are refreshing one room or shaping a full interior story, share a few details and
+      we will follow up with next steps.
+    </p>
+  </div>
+
+  <form class="contact__form" data-contact-form data-endpoint={endpoint}>
+    <label>
+      Name
+      <input name="name" type="text" autocomplete="name" required />
+    </label>
+    <label>
+      Email
+      <input name="email" type="email" autocomplete="email" required />
+    </label>
+    <label>
+      Phone number
+      <input name="phone" type="tel" autocomplete="tel" />
+    </label>
+    <label class="is-full">
+      Brief description of the project
+      <textarea name="description" rows="6" required></textarea>
+    </label>
+    <div class="contact__actions is-full">
+      <button type="submit">Send Inquiry</button>
+      <p class="contact__status" data-form-status>
+        {endpoint
+          ? 'We will reach out after submission.'
+          : 'Add PUBLIC_FORMSPREE_ENDPOINT to activate this form.'}
+      </p>
+    </div>
+  </form>
+</section>
+
+<script is:inline>
+  const forms = document.querySelectorAll('[data-contact-form]');
+
+  forms.forEach((form) => {
+    const endpoint = form.getAttribute('data-endpoint');
+    const status = form.querySelector('[data-form-status]');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!endpoint) {
+        if (status) status.textContent = 'This form is ready, but it needs a Formspree endpoint before launch.';
+        return;
+      }
+
+      const submitter = form.querySelector('button[type="submit"]');
+      submitter?.setAttribute('disabled', 'true');
+      if (status) status.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form)
+        });
+
+        if (!response.ok) throw new Error('Submission failed');
+        form.reset();
+        if (status) status.textContent = 'Thank you. Your inquiry has been sent.';
+      } catch (error) {
+        if (status) status.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
+      } finally {
+        submitter?.removeAttribute('disabled');
+      }
+    });
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .contact__form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+    padding: 2rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(247, 241, 234, 0.92));
+    border: 1px solid rgba(43, 43, 43, 0.08);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .contact__form label {
+    display: grid;
+    gap: 0.55rem;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+  }
+
+  .contact__form input,
+  .contact__form textarea {
+    width: 100%;
+    border: 1px solid rgba(43, 43, 43, 0.12);
+    border-radius: 1rem;
+    background: rgba(253, 251, 247, 0.8);
+    padding: 0.95rem 1rem;
+    color: var(--color-text);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .contact__form input:focus,
+  .contact__form textarea:focus {
+    outline: none;
+    border-color: rgba(196, 122, 90, 0.6);
+    box-shadow: 0 0 0 4px rgba(196, 122, 90, 0.12);
+  }
+
+  .contact__form .is-full {
+    grid-column: 1 / -1;
+  }
+
+  .contact__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .contact__actions button {
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 0.95rem 1.4rem;
+    transition: transform 220ms var(--ease-luxury), background-color 220ms ease;
+  }
+
+  .contact__actions button:hover,
+  .contact__actions button:focus-visible {
+    transform: translateY(-2px);
+    background: var(--color-accent);
+  }
+
+  .contact__actions button[disabled] {
+    opacity: 0.75;
+    cursor: wait;
+  }
+
+  .contact__status {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .contact__form {
+      grid-template-columns: 1fr;
+      padding: 1.5rem;
+    }
+
+    .contact__actions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

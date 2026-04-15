@@ -1,0 +1,35 @@
+---
+import { withBase } from '../lib/paths';
+
+type Props = {
+  title: string;
+  body: string;
+};
+
+const { title, body } = Astro.props;
+---
+
+<section class="placeholder shell">
+  <p class="eyebrow">In Progress</p>
+  <h1 class="section-title">{title}</h1>
+  <p class="placeholder__copy">{body}</p>
+  <a class="button-link" href={withBase('/#inquire')}>Start an inquiry</a>
+</section>
+
+<style>
+  .placeholder {
+    display: grid;
+    gap: 1.25rem;
+    padding: 12vh 0 18vh;
+    min-height: calc(100vh - 160px);
+    align-content: center;
+    max-width: 52rem;
+  }
+
+  .placeholder__copy {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+</style>

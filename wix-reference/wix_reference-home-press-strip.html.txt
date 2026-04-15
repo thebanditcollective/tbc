@@ -1,0 +1,81 @@
+<!-- Bandit Collective - Press Strip -->
+<section class="bc-press">
+  <div class="bc-press-inner">
+    <p class="bc-press-label">As seen in</p>
+    <div class="bc-press-logos">
+      <img src="https://static.wixstatic.com/media/2a57e1_9495e4731a9f427a84150e75ffcdd054~mv2.png" alt="Veranda">
+      <img src="https://static.wixstatic.com/media/2a57e1_837ddf4af903485aadc897cb35c3bb51~mv2.png" alt="Architectural Digest AD Pro">
+      <img src="https://static.wixstatic.com/media/2a57e1_f0859ff17eb04ab29cab61870540f9e9~mv2.png" alt="Cottage & Gardens">
+    </div>
+  </div>
+</section>
+
+<style>
+  .bc-press {
+    background: #FDFBF7 !important;
+    padding: 56px 0 64px 0 !important;
+    margin: 0 !important;
+    font-family: 'Manrope', sans-serif !important;
+  }
+
+  .bc-press-inner {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 8% !important;
+    text-align: center !important;
+  }
+
+  .bc-press-label {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: rgba(43, 43, 43, 0.4) !important;
+    margin: 0 0 28px 0 !important;
+  }
+
+  .bc-press-logos {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(40px, 8vw, 80px) !important;
+    flex-wrap: wrap !important;
+  }
+
+  .bc-press-logos img {
+    height: 28px !important;
+    width: auto !important;
+    max-width: 140px !important;
+    object-fit: contain !important;
+    filter: grayscale(100%) !important;
+    opacity: 0.35 !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .bc-press-logos img:hover {
+    filter: grayscale(0%) !important;
+    opacity: 1 !important;
+  }
+
+  @media (max-width: 767px) {
+    .bc-press {
+      padding: 48px 0 56px 0 !important;
+    }
+    .bc-press-inner {
+      padding: 0 6% !important;
+    }
+    .bc-press-label {
+      margin-bottom: 24px !important;
+      font-size: 12px !important;
+    }
+    .bc-press-logos {
+      gap: 32px !important;
+    }
+    .bc-press-logos img {
+      height: 22px !important;
+      max-width: 110px !important;
+      opacity: 0.45 !important;
+    }
+  }
+</style>

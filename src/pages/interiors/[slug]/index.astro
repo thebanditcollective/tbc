@@ -1,0 +1,194 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CrossfadeStack from '../../../components/CrossfadeStack.astro';
+import { getProjects, getProjectBySlug } from '../../../lib/content';
+import { withBase } from '../../../lib/paths';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    params: { slug: project.slug }
+  }));
+}
+
+const { slug } = Astro.params;
+const project = slug ? await getProjectBySlug(slug) : undefined;
+
+if (!project) {
+  throw new Error(`Project not found for slug: ${slug}`);
+}
+
+const projects = await getProjects();
+const nextProject = projects.find((item) => item.slug === project.data.nextProjectSlug) ?? projects[0];
+---
+
+  <BaseLayout
+  title={`${project.data.title} | Bandit Collective`}
+  description={project.data.shortDescription}
+  pathname={`/interiors/${project.slug}`}
+>
+  <article class="case-study">
+    <section class="case-study__hero">
+      <CrossfadeStack
+        className="case-study__hero-slideshow"
+        images={project.data.heroImages.map((image) => ({
+          src: image.src,
+          alt: `${project.data.title} hero image`
+        }))}
+        interval={4000}
+      />
+    </section>
+
+    <section class="case-study__header shell">
+      <a class="case-study__back" href={withBase('/interiors')}>Back to Interiors</a>
+      <h1>{project.data.title}</h1>
+      <p class="case-study__meta">{project.data.location} / {project.data.year}</p>
+      <p class="case-study__description">{project.data.shortDescription}</p>
+    </section>
+
+    <section class="case-study__story">
+      {project.data.storyImages.map((image, index) => (
+        <div class:list={['case-study__story-item', { 'is-full-bleed': index === 0 }]}>
+          <img
+            src={image.src}
+            alt={`${project.data.title} story image ${index + 1}`}
+            loading={index === 0 ? 'eager' : 'lazy'}
+          />
+        </div>
+      ))}
+    </section>
+
+    <footer class="case-study__next shell">
+      <a href={withBase(`/interiors/${nextProject.slug}`)}>
+        <span>Next Project</span>
+        <strong>{nextProject.data.title}</strong>
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .case-study {
+    padding-bottom: 96px;
+  }
+
+  .case-study__hero {
+    height: min(90vh, 900px);
+    min-height: 620px;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .case-study__hero-slideshow {
+    height: 100%;
+  }
+
+  .case-study__header {
+    display: grid;
+    gap: 0.8rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+  }
+
+  .case-study__back {
+    color: var(--color-accent);
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .case-study__header h1 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 6vw, 5.6rem);
+    line-height: 0.95;
+  }
+
+  .case-study__meta {
+    margin: 0;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.92rem;
+  }
+
+  .case-study__description {
+    max-width: 50ch;
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.8;
+  }
+
+  .case-study__story {
+    display: grid;
+    gap: 80px;
+  }
+
+  .case-study__story-item {
+    width: min(1000px, calc(100% - 16vw));
+    margin: 0 auto;
+  }
+
+  .case-study__story-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .case-study__story-item.is-full-bleed {
+    width: 100%;
+  }
+
+  .case-study__next {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 5rem;
+  }
+
+  .case-study__next a {
+    display: grid;
+    gap: 0.35rem;
+    text-align: right;
+  }
+
+  .case-study__next span {
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.86rem;
+  }
+
+  .case-study__next strong {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+  }
+
+  @media (max-width: 720px) {
+    .case-study__hero {
+      height: 70vh;
+      min-height: 480px;
+    }
+
+    .case-study__header {
+      text-align: center;
+    }
+
+    .case-study__story {
+      gap: 48px;
+    }
+
+    .case-study__story-item,
+    .case-study__story-item.is-full-bleed {
+      width: calc(100% - (var(--page-pad) * 2));
+    }
+
+    .case-study__next {
+      justify-content: center;
+    }
+
+    .case-study__next a {
+      text-align: center;
+    }
+  }
+</style>

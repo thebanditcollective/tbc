@@ -1,0 +1,197 @@
+<!-- Bandit Collective - Contact -->
+<section class="bc-contact" id="contact">
+  <div class="bc-contact-inner">
+    <h2 class="bc-contact-headline">Start your story</h2>
+    
+    <form class="bc-contact-form" id="bcContactForm">
+      <div class="bc-field">
+        <input type="text" name="name" placeholder="Name" required>
+      </div>
+      
+      <div class="bc-field">
+        <input type="email" name="email" placeholder="Email" required>
+      </div>
+      
+      <div class="bc-field">
+        <input type="tel" name="phone" placeholder="Phone, optional">
+      </div>
+      
+      <div class="bc-field bc-field-textarea">
+        <textarea name="message" rows="4" placeholder="Tell us about your space" required></textarea>
+      </div>
+      
+      <button type="submit" class="bc-submit">
+        <span>Send it our way</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>      
+    </form>
+    
+    <div class="bc-contact-success" id="bcContactSuccess">
+      <p>Sent. We'll be in touch!</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bc-contact {
+    background: #FDFBF7 !important;
+    padding: 80px 0 100px 0 !important;
+    font-family: 'Manrope', sans-serif !important;
+  }
+
+  .bc-contact-inner {
+    max-width: 640px !important;
+    margin: 0 auto !important;
+    padding: 0 8% !important;
+  }
+
+  .bc-contact-headline {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(32px, 5vw, 48px) !important;
+    color: #2B2B2B !important;
+    margin: 0 0 48px 0 !important;
+    text-align: center !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .bc-contact-form {
+    display: block !important;
+  }
+
+  .bc-field {
+    margin-bottom: 32px !important;
+  }
+
+  .bc-field input,
+  .bc-field textarea {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(43, 43, 43, 0.2) !important;
+    padding: 12px 0 12px 0 !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 16px !important;
+    color: #2B2B2B !important;
+    outline: none !important;
+    transition: border-color 0.3s ease !important;
+    border-radius: 0 !important;
+    -webkit-appearance: none !important;
+  }
+
+  .bc-field input::placeholder,
+  .bc-field textarea::placeholder {
+    color: rgba(43, 43, 43, 0.5) !important;
+    opacity: 1 !important;
+  }
+
+  .bc-field input:focus,
+  .bc-field textarea:focus {
+    border-bottom: 2px solid #C47A5A !important;
+    padding-bottom: 11px !important;
+  }
+
+  .bc-field textarea {
+    resize: vertical !important;
+    min-height: 100px !important;
+    line-height: 1.6 !important;
+  }
+
+  .bc-submit {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #C47A5A !important;
+    padding: 12px 0 8px 0 !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-style: italic !important;
+    font-size: 20px !important;
+    color: #2B2B2B !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    margin-top: 16px !important;
+  }
+
+  .bc-submit:hover {
+    color: #C47A5A !important;
+    gap: 12px !important;
+  }
+
+  .bc-submit svg {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .bc-submit:hover svg {
+    transform: translateX(4px) !important;
+  }
+
+  .bc-contact-note {
+    font-size: 14px !important;
+    color: rgba(43, 43, 43, 0.6) !important;
+    margin: 24px 0 0 0 !important;
+    text-align: center !important;
+  }
+
+  .bc-contact-success {
+    display: none !important;
+    text-align: center !important;
+    padding: 40px 0 !important;
+  }
+
+  .bc-contact-success p {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-style: italic !important;
+    font-size: 24px !important;
+    color: #C47A5A !important;
+    margin: 0 !important;
+  }
+
+  .bc-contact-success.is-visible {
+    display: block !important;
+  }
+
+  .bc-contact-form.is-hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 767px) {
+    .bc-contact {
+      padding: 64px 0 80px 0 !important;
+    }
+    .bc-contact-inner {
+      padding: 0 6% !important;
+    }
+    .bc-contact-headline {
+      margin-bottom: 40px !important;
+    }
+    .bc-submit {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    const form = document.getElementById('bcContactForm');
+    const success = document.getElementById('bcContactSuccess');
+    
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Wix forms need to be connected in the editor to actually send
+        // This just handles the UI feedback
+        form.classList.add('is-hidden');
+        success.classList.add('is-visible');
+        
+        // Optional: scroll to success message
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  })();
+</script>

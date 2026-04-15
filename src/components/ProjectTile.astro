@@ -1,0 +1,63 @@
+---
+import CrossfadeStack from './CrossfadeStack.astro';
+
+type TileImage = {
+  src: string;
+  alt: string;
+};
+
+type Props = {
+  href: string;
+  title: string;
+  location: string;
+  year: number;
+  images: TileImage[];
+};
+
+const { href, title, location, year, images } = Astro.props;
+---
+
+<a class="project-tile" href={href}>
+  <div class="project-tile__media">
+    <CrossfadeStack images={images} interval={4000} />
+  </div>
+  <div class="project-tile__meta">
+    <h2>{title}</h2>
+    <p>{location}, {year}</p>
+  </div>
+</a>
+
+<style>
+  .project-tile {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .project-tile:hover .project-tile__media :global(.crossfade-stack__image.is-active),
+  .project-tile:focus-visible .project-tile__media :global(.crossfade-stack__image.is-active) {
+    transform: scale(1.03);
+  }
+
+  .project-tile__media {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .project-tile__meta h2 {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .project-tile__meta p {
+    margin: 0;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+  }
+</style>

@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectTile from '../../components/ProjectTile.astro';
+import { getProjects } from '../../lib/content';
+import { withBase } from '../../lib/paths';
+
+const projects = await getProjects();
+---
+
+<BaseLayout
+  title="Interiors | Bandit Collective"
+  description="Portfolio of interior design work by Bandit Collective."
+  pathname="/interiors"
+>
+  <section class="interiors shell">
+    <div class="interiors__grid">
+      {projects.map((project) => (
+        <ProjectTile
+          href={withBase(`/interiors/${project.slug}`)}
+          title={project.data.title}
+          location={project.data.location}
+          year={project.data.year}
+          images={project.data.coverImages.map((image) => ({
+            src: image.src,
+            alt: `${project.data.title} cover image`
+          }))}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .interiors {
+    padding-top: 96px;
+    padding-bottom: 120px;
+  }
+
+  .interiors__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 56px;
+    row-gap: 80px;
+  }
+
+  @media (max-width: 900px) {
+    .interiors__grid {
+      grid-template-columns: 1fr;
+      row-gap: 64px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .interiors {
+      padding-top: 72px;
+      padding-bottom: 88px;
+    }
+  }
+</style>
