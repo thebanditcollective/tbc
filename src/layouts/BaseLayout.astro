@@ -80,7 +80,7 @@ const instagramUrl = 'https://www.instagram.com/thebandit.collective';
       <div class="site-header__mobile-panel" id="mobile-menu" data-mobile-menu hidden>
         <nav class="site-header__mobile-nav shell" aria-label="Mobile navigation">
           {mobileNavItems.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href);
+            const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <a class:list={['site-header__mobile-link', { 'is-active': active }]} href={withBase(item.href)}>
                 {item.label}
@@ -321,7 +321,7 @@ const instagramUrl = 'https://www.instagram.com/thebandit.collective';
     justify-content: center;
     gap: 0.6rem;
     align-items: center;
-    margin: 0;
+    margin: 0 auto;
     color: var(--color-muted);
     font-size: 0.95rem;
     line-height: 1.5;

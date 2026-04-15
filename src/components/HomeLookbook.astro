@@ -63,6 +63,7 @@ const slides = [
               loading={index < 3 ? 'eager' : 'lazy'}
               fetchpriority={index < 3 ? 'auto' : 'low'}
               decoding="async"
+              draggable="false"
               data-lookbook-lightbox-index={index}
               data-lookbook-lightbox-trigger
             />
@@ -227,9 +228,11 @@ const slides = [
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartOffset = 0;
+    let touchStartIndex = 0;
     let touchOffset = 0;
     let isTouching = false;
     let isTouchSwipe = false;
+    let lastViewportWidth = window.innerWidth;
 
     if (!track || !cards.length || !dots.length) return;
 
@@ -332,6 +335,7 @@ const slides = [
       if (event.touches.length !== 1) return;
       touchStartX = event.touches[0].clientX;
       touchStartY = event.touches[0].clientY;
+      touchStartIndex = activeIndex;
       touchStartOffset = getCardOffset(activeIndex);
       touchOffset = touchStartOffset;
       isTouching = true;
@@ -345,7 +349,12 @@ const slides = [
       const deltaY = event.touches[0].clientY - touchStartY;
 
       if (!isTouchSwipe) {
-        if (Math.abs(deltaY) > Math.abs(deltaX) || Math.abs(deltaX) < 8) return;
+        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.35 && Math.abs(deltaY) > 10) {
+          isTouching = false;
+          return;
+        }
+
+        if (Math.abs(deltaX) < 8 || Math.abs(deltaX) < Math.abs(deltaY) * 0.7) return;
         isTouchSwipe = true;
       }
 
@@ -359,7 +368,7 @@ const slides = [
       }
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (event) => {
       if (!isTouching) return;
 
       isTouching = false;
@@ -368,11 +377,20 @@ const slides = [
         return;
       }
 
+      const changedTouch = event.changedTouches?.[0];
+      const deltaX = changedTouch ? changedTouch.clientX - touchStartX : touchStartOffset - touchOffset;
+      const deltaY = changedTouch ? changedTouch.clientY - touchStartY : 0;
+      const swipeThreshold = Math.max(48, lookbook.clientWidth * 0.2);
+      const isIntentionalSwipe = Math.abs(deltaX) >= swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 0.75;
+      const targetIndex = isIntentionalSwipe
+        ? touchStartIndex + (deltaX < 0 ? 1 : -1)
+        : getNearestReachableIndex(touchOffset);
+
       suppressLookbookClick = true;
       window.setTimeout(() => {
         suppressLookbookClick = false;
       }, 350);
-      scrollToCard(getNearestReachableIndex(touchOffset));
+      scrollToCard(targetIndex);
       isTouchSwipe = false;
     };
 
@@ -383,7 +401,11 @@ const slides = [
     track.addEventListener('touchmove', handleTouchMove, { passive: false });
     track.addEventListener('touchend', handleTouchEnd, { passive: true });
     track.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-    window.addEventListener('resize', () => scrollToCard(activeIndex));
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === lastViewportWidth) return;
+      lastViewportWidth = window.innerWidth;
+      scrollToCard(activeIndex);
+    });
 
     update();
   });
@@ -443,6 +465,8 @@ const slides = [
     object-fit: cover;
     object-position: center 30%;
     display: block;
+    -webkit-user-drag: none;
+    user-select: none;
     background: #eae6e1;
     transition: transform 600ms var(--ease-luxury);
   }
@@ -756,7 +780,7 @@ const slides = [
 
     .home-lookbook__card img,
     .home-lookbook__card--end {
-      height: min(58dvh, 30rem);
+      height: min(58svh, 30rem);
     }
 
     .home-lookbook__arrow {
