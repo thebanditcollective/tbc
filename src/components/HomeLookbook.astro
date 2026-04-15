@@ -225,13 +225,14 @@ const slides = [
     let hasSwiped = false;
     let activeIndex = 0;
     let wheelLocked = false;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartOffset = 0;
-    let touchStartIndex = 0;
-    let touchOffset = 0;
-    let isTouching = false;
-    let isTouchSwipe = false;
+    let swipePointerId = null;
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeStartOffset = 0;
+    let swipeStartIndex = 0;
+    let swipeOffset = 0;
+    let isPointerDown = false;
+    let isHorizontalSwipe = false;
     let lastViewportWidth = window.innerWidth;
 
     if (!track || !cards.length || !dots.length) return;
@@ -254,9 +255,9 @@ const slides = [
     };
 
     const setTrackOffset = (offset, animate = true) => {
-      touchOffset = Math.max(0, Math.min(getMaxOffset(), offset));
+      swipeOffset = Math.max(0, Math.min(getMaxOffset(), offset));
       track.style.transition = animate ? '' : 'none';
-      track.style.transform = `translateX(-${touchOffset}px)`;
+      track.style.transform = `translateX(-${swipeOffset}px)`;
     };
 
     const getNearestReachableIndex = (offset) => {
@@ -331,76 +332,95 @@ const slides = [
       }, 520);
     };
 
-    const handleTouchStart = (event) => {
-      if (event.touches.length !== 1) return;
-      touchStartX = event.touches[0].clientX;
-      touchStartY = event.touches[0].clientY;
-      touchStartIndex = activeIndex;
-      touchStartOffset = getCardOffset(activeIndex);
-      touchOffset = touchStartOffset;
-      isTouching = true;
-      isTouchSwipe = false;
+    const resetSwipe = () => {
+      swipePointerId = null;
+      isPointerDown = false;
+      isHorizontalSwipe = false;
+      track.style.transition = '';
     };
 
-    const handleTouchMove = (event) => {
-      if (!isTouching || event.touches.length !== 1) return;
+    const handlePointerDown = (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
 
-      const deltaX = event.touches[0].clientX - touchStartX;
-      const deltaY = event.touches[0].clientY - touchStartY;
+      swipePointerId = event.pointerId;
+      swipeStartX = event.clientX;
+      swipeStartY = event.clientY;
+      swipeStartIndex = activeIndex;
+      swipeStartOffset = getCardOffset(activeIndex);
+      swipeOffset = swipeStartOffset;
+      isPointerDown = true;
+      isHorizontalSwipe = false;
+    };
 
-      if (!isTouchSwipe) {
-        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.35 && Math.abs(deltaY) > 10) {
-          isTouching = false;
+    const handlePointerMove = (event) => {
+      if (!isPointerDown || event.pointerId !== swipePointerId) return;
+
+      const deltaX = event.clientX - swipeStartX;
+      const deltaY = event.clientY - swipeStartY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      if (!isHorizontalSwipe) {
+        if (absX < 8 && absY < 8) return;
+
+        if (absY > absX * 1.35) {
+          resetSwipe();
           return;
         }
 
-        if (Math.abs(deltaX) < 8 || Math.abs(deltaX) < Math.abs(deltaY) * 0.7) return;
-        isTouchSwipe = true;
+        if (absX < 8 || absX < absY * 0.6) return;
+        isHorizontalSwipe = true;
+        track.setPointerCapture?.(event.pointerId);
       }
 
       event.preventDefault();
-      setTrackOffset(touchStartOffset - deltaX, false);
+      setTrackOffset(swipeStartOffset - deltaX, false);
 
-      const nearestIndex = getNearestReachableIndex(touchOffset);
+      const nearestIndex = getNearestReachableIndex(swipeOffset);
       if (nearestIndex !== activeIndex) {
         activeIndex = nearestIndex;
         update();
       }
     };
 
-    const handleTouchEnd = (event) => {
-      if (!isTouching) return;
+    const handlePointerUp = (event) => {
+      if (!isPointerDown || event.pointerId !== swipePointerId) return;
 
-      isTouching = false;
-      if (!isTouchSwipe) {
-        track.style.transition = '';
+      if (!isHorizontalSwipe) {
+        resetSwipe();
         return;
       }
 
-      const changedTouch = event.changedTouches?.[0];
-      const deltaX = changedTouch ? changedTouch.clientX - touchStartX : touchStartOffset - touchOffset;
-      const deltaY = changedTouch ? changedTouch.clientY - touchStartY : 0;
-      const swipeThreshold = Math.max(48, lookbook.clientWidth * 0.2);
-      const isIntentionalSwipe = Math.abs(deltaX) >= swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 0.75;
+      const deltaX = event.clientX - swipeStartX;
+      const deltaY = event.clientY - swipeStartY;
+      const swipeThreshold = Math.max(32, lookbook.clientWidth * 0.1);
+      const isIntentionalSwipe = Math.abs(deltaX) >= swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 0.6;
       const targetIndex = isIntentionalSwipe
-        ? touchStartIndex + (deltaX < 0 ? 1 : -1)
-        : getNearestReachableIndex(touchOffset);
+        ? swipeStartIndex + (deltaX < 0 ? 1 : -1)
+        : swipeStartIndex;
 
       suppressLookbookClick = true;
       window.setTimeout(() => {
         suppressLookbookClick = false;
       }, 350);
       scrollToCard(targetIndex);
-      isTouchSwipe = false;
+      resetSwipe();
+    };
+
+    const handlePointerCancel = (event) => {
+      if (event.pointerId !== swipePointerId) return;
+      if (isHorizontalSwipe) scrollToCard(activeIndex);
+      resetSwipe();
     };
 
     prevButton?.addEventListener('click', () => scrollByCard(-1));
     nextButton?.addEventListener('click', () => scrollByCard(1));
     lookbook.addEventListener('wheel', handleWheel, { passive: false });
-    track.addEventListener('touchstart', handleTouchStart, { passive: true });
-    track.addEventListener('touchmove', handleTouchMove, { passive: false });
-    track.addEventListener('touchend', handleTouchEnd, { passive: true });
-    track.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    track.addEventListener('pointerdown', handlePointerDown);
+    track.addEventListener('pointermove', handlePointerMove);
+    track.addEventListener('pointerup', handlePointerUp);
+    track.addEventListener('pointercancel', handlePointerCancel);
+    track.addEventListener('lostpointercapture', handlePointerCancel);
     window.addEventListener('resize', () => {
       if (window.innerWidth === lastViewportWidth) return;
       lastViewportWidth = window.innerWidth;
@@ -776,11 +796,6 @@ const slides = [
 
     .home-lookbook__card {
       flex-basis: 89vw;
-    }
-
-    .home-lookbook__card img,
-    .home-lookbook__card--end {
-      height: min(58svh, 30rem);
     }
 
     .home-lookbook__arrow {
