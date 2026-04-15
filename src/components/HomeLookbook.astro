@@ -54,19 +54,21 @@ const slides = [
       <div class="home-lookbook__track" data-home-lookbook-track tabindex="0" aria-label="Project image carousel">
         {slides.map((slide, index) => (
           <article class:list={['home-lookbook__card', { 'is-active': index === 0 }]} data-home-lookbook-card>
-            <Image
-              class="carousel-img"
-              src={slide.src}
-              alt={slide.alt}
-              format="webp"
-              quality={82}
-              loading={index < 3 ? 'eager' : 'lazy'}
-              fetchpriority={index < 3 ? 'auto' : 'low'}
-              decoding="async"
-              draggable="false"
-              data-lookbook-lightbox-index={index}
-              data-lookbook-lightbox-trigger
-            />
+            <div class="home-lookbook__image-frame">
+              <Image
+                class="carousel-img"
+                src={slide.src}
+                alt={slide.alt}
+                format="webp"
+                quality={82}
+                loading={index < 3 ? 'eager' : 'lazy'}
+                fetchpriority={index < 3 ? 'auto' : 'low'}
+                decoding="async"
+                draggable="false"
+                data-lookbook-lightbox-index={index}
+                data-lookbook-lightbox-trigger
+              />
+            </div>
             {index < slides.length - 1 && (
               <div class="home-lookbook__indicator" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -108,6 +110,12 @@ const slides = [
 
   <div class="home-lookbook-lightbox" data-lookbook-lightbox aria-hidden="true">
     <button
+      class="home-lookbook-lightbox__close"
+      type="button"
+      aria-label="Close image preview"
+      data-lookbook-lightbox-close
+    >×</button>
+    <button
       class="home-lookbook-lightbox__arrow home-lookbook-lightbox__arrow--prev"
       type="button"
       aria-label="View previous image"
@@ -117,7 +125,9 @@ const slides = [
         <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
-    <img src="" alt="" data-lookbook-lightbox-image />
+    <div class="home-lookbook-lightbox__frame">
+      <img src="" alt="" data-lookbook-lightbox-image />
+    </div>
     <button
       class="home-lookbook-lightbox__arrow home-lookbook-lightbox__arrow--next"
       type="button"
@@ -136,6 +146,7 @@ const slides = [
   const lookbookLightboxImage = lookbookLightbox?.querySelector('[data-lookbook-lightbox-image]');
   const lookbookLightboxPrev = lookbookLightbox?.querySelector('[data-lookbook-lightbox-prev]');
   const lookbookLightboxNext = lookbookLightbox?.querySelector('[data-lookbook-lightbox-next]');
+  const lookbookLightboxClose = lookbookLightbox?.querySelector('[data-lookbook-lightbox-close]');
   const lookbookLightboxTriggers = Array.from(document.querySelectorAll('[data-lookbook-lightbox-trigger]'));
   let lookbookLightboxIndex = 0;
   let lookbookTouchStartX = 0;
@@ -190,6 +201,7 @@ const slides = [
 
   lookbookLightboxPrev?.addEventListener('click', () => moveLookbookLightbox(-1));
   lookbookLightboxNext?.addEventListener('click', () => moveLookbookLightbox(1));
+  lookbookLightboxClose?.addEventListener('click', closeLookbookLightbox);
 
   lookbookLightbox?.addEventListener('touchstart', (event) => {
     lookbookTouchStartX = event.changedTouches[0]?.clientX ?? 0;
@@ -446,16 +458,22 @@ const slides = [
     opacity: 1;
   }
 
-  .home-lookbook__card img {
+  .home-lookbook__image-frame {
     width: 100%;
+    overflow: hidden;
     aspect-ratio: 4 / 5;
     height: min(77svh, 41rem);
+    background: #eae6e1;
+  }
+
+  .home-lookbook__card img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center 30%;
     display: block;
     -webkit-user-drag: none;
     user-select: none;
-    background: #eae6e1;
     transition: transform 600ms var(--ease-luxury);
   }
 
@@ -469,11 +487,40 @@ const slides = [
     background: rgba(0, 0, 0, 0.7);
   }
 
-  .home-lookbook-lightbox img {
-    max-width: 90vw;
-    max-height: 90vh;
-    object-fit: contain;
+  .home-lookbook-lightbox__frame {
     z-index: 1;
+    width: min(90vw, 68vh);
+    max-height: 85vh;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .home-lookbook-lightbox img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 1;
+  }
+
+  .home-lookbook-lightbox__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .home-lookbook-lightbox__close:hover,
+  .home-lookbook-lightbox__close:focus-visible {
+    color: rgba(255, 255, 255, 0.72);
   }
 
   .home-lookbook-lightbox__arrow {
@@ -785,9 +832,8 @@ const slides = [
       scroll-snap-align: end;
     }
 
-    .home-lookbook__card img {
+    .home-lookbook__image-frame {
       height: auto;
-      object-fit: initial;
     }
 
     .home-lookbook__arrow {

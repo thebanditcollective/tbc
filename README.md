@@ -93,10 +93,19 @@ Wix reference exports:
 
 Image assets:
 
-- Hero: `public/images/home/home-hero.jpg`
-- Spectrum feature: `public/images/home/home-hero-2.jpg`
-- Lookbook carousel: `public/images/home/home carousel/`
+- Optimized homepage source images: `src/assets/images/home/`
+  - Hero: `src/assets/images/home/hero/`
+  - Lookbook carousel: `src/assets/images/home/lookbook/`
+  - Spectrum feature: `src/assets/images/home/spectrum/`
+- Legacy/reference homepage public images still exist in `public/images/home/`, but active homepage hero/lookbook/spectrum imagery now imports from `src/assets` and is processed by Astro.
 - Press logos: `public/images/press/`
+
+## Image Handling
+
+- Homepage hero, lookbook, and spectrum images are imported from `src/assets/images/home/` and rendered with Astro's `Image` component.
+- Astro converts those source images to optimized WebP files at build time.
+- `public/images/home/optimized/` contains earlier manually compressed WebP files, but the active homepage now uses the Astro asset pipeline instead.
+- Assets that must be served directly, such as press logos, remain in `public/images/`.
 
 ## Current Homepage Structure
 
@@ -124,6 +133,10 @@ Current intended behavior:
 - On scroll, the header smoothly transitions to `rgba(0, 0, 0, 0.3)`.
 - Header text/nav/toggle stay white in the scrolled state.
 - Header background transition is driven by a `--header-scroll-progress` CSS variable updated in inline JS.
+- Mobile nav includes Home, Interiors, Services, and Contact.
+- Mobile nav active state is URL-based; Home is active only on `/`, while non-root links can match nested paths.
+- Mobile hamburger animates smoothly into an X when opened and back to lines when closed.
+- Mobile dropdown fades/slides open and uses a 75% black background.
 
 Be careful editing this file because it controls all pages and the mobile menu.
 
@@ -153,12 +166,12 @@ File: `src/components/HomeLookbook.astro`
 
 Uses local images from:
 
-- `public/images/home/home carousel/ClintonStreet_012.jpg`
-- `public/images/home/home carousel/ClintonStreet_312A.jpg`
-- `public/images/home/home carousel/DSC_3061-1.jpg`
-- `public/images/home/home carousel/DSC_3078-3.jpg`
-- `public/images/home/home carousel/DSC_3116-1.jpg`
-- `public/images/home/home carousel/DSC_3251-1 crop.jpg`
+- `src/assets/images/home/lookbook/lookbook-01.jpg`
+- `src/assets/images/home/lookbook/lookbook-02.jpg`
+- `src/assets/images/home/lookbook/lookbook-03.jpg`
+- `src/assets/images/home/lookbook/lookbook-04.jpg`
+- `src/assets/images/home/lookbook/lookbook-05.jpg`
+- `src/assets/images/home/lookbook/lookbook-06.jpg`
 
 Current intended behavior:
 
@@ -174,12 +187,17 @@ Current intended behavior:
 - The final card says `See the complete story`.
 - The final card itself is not a link; only the arrow inside the final card links to `/interiors`.
 - The CTA under the carousel says `Step inside the full collection`.
+- On mobile, the carousel uses native horizontal scroll with CSS scroll-snap and `-webkit-overflow-scrolling: touch`.
+- Mobile dots sync from the native `scrollLeft` position.
+- Mobile carousel images use natural height (`height: auto`) to avoid viewport-height resizing/jumps when browser UI appears or disappears.
+- Mobile scroll/drag suppresses accidental lightbox opens; taps still open the lightbox.
+- The final mobile card matches the rendered height of the previous carousel image and snaps to the end so the previous image peeks from the left.
 
 Important implementation detail:
 
-- The carousel is currently transform-based, not native horizontal scrolling.
-- This was changed because native overflow scrolling was behaving inconsistently and the dots were drifting right.
-- Arrow/dot navigation updates `activeIndex` and applies `track.style.transform`.
+- Desktop carousel remains transform-based.
+- Mobile carousel is native scroll-snap. Do not reintroduce custom pointer/touch swipe handling unless there is a clear reason.
+- Arrow/dot navigation updates `activeIndex`; desktop applies `track.style.transform`, while mobile uses `track.scrollTo()`.
 - The right arrow should stop once the final card is fully visible, without allowing extra blank space to the right.
 - Recent user feedback specifically focused on desktop: if all remaining images/final card are already visible, dot navigation should not advance beyond the last position that changes the carousel.
 
@@ -194,6 +212,8 @@ If continuing work here, test these cases manually in the browser:
 - Final card can be fully visible.
 - No blank space appears to the right of the final card.
 - Right arrow disappears when no further visible movement is possible.
+- On mobile, horizontal swiping should move the native scroll carousel smoothly, while vertical swiping should scroll the page normally.
+- On mobile, the carousel should not jump or resize while scrolling.
 
 ### HomeSpectrumFeature
 
@@ -202,7 +222,7 @@ File: `src/components/HomeSpectrumFeature.astro`
 Current intended behavior:
 
 - Full-screen feature section.
-- Uses `public/images/home/home-hero-2.jpg`.
+- Uses `src/assets/images/home/spectrum/spectrum-feature.jpg` through Astro image optimization.
 - Image fills available screen area.
 - Text band reads: `From the first color` -> arrow -> `to the final detail`.
 - The section no longer uses negative `100vw` full-bleed positioning because that was causing horizontal drift.
@@ -233,6 +253,16 @@ Current intended behavior:
   - `adpro_logo.png`
   - `CG_Logo_BLACK-site.jpg`
 - Logos are grayscale/low-opacity by default and brighten on hover.
+
+### Footer
+
+File: `src/layouts/BaseLayout.astro`
+
+Current intended behavior:
+
+- Footer content is centered in the same page container alignment as the `As seen in` press strip.
+- Content is: Instagram icon/link, `Follow us on Instagram`, divider, and `(c) 2025 Bandit Collective. All Rights Reserved.`
+- On mobile, footer content can wrap to two lines while staying centered.
 
 ## Base Path Rules
 
