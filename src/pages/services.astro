@@ -1,11 +1,599 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PlaceholderPage from '../components/PlaceholderPage.astro';
+import consultations01 from '../assets/images/services/consultations-01.jpg';
+import consultations02 from '../assets/images/services/consultations-02.jpg';
+import interiors01 from '../assets/images/services/interiors-01.jpg';
+import interiors02 from '../assets/images/services/interiors-02.jpg';
+
+const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
+
+const services = [
+  {
+    eyebrow: 'Consultations',
+    title: 'A focused conversation for the space already on your mind.',
+    intro:
+      'For the room that needs direction, the decision that keeps circling, or the idea that wants a sharper point of view.',
+    body:
+      'Consultations are designed for clients who want The Bandit Collective eye without a full-service engagement. We can talk through layout, palette, furniture, lighting, art, styling, sourcing, or the pieces already living in your space.',
+    note:
+      'You may come with a nearly finished room, a blank wall, a floor plan, or a pile of inspiration. We will begin with a quick call, understand what would be most useful, and shape the support from there.',
+    images: [
+      { src: consultations01, alt: 'Layered seating and collected interior details' },
+      { src: consultations02, alt: 'Warm interior corner with considered lighting and texture' }
+    ]
+  },
+  {
+    eyebrow: 'Full Interiors',
+    title: 'A complete design story, carried from first feeling to final detail.',
+    intro:
+      'For a room, several rooms, or an entire home ready for a deeper transformation.',
+    body:
+      'Full interiors are immersive, personal, and highly considered. We shape the creative direction, plan the space, source furniture, lighting, textiles, art, and objects, and guide the design as it becomes lived-in and whole.',
+    note:
+      'This is for clients who want a collected home with a strong point of view, thoughtful layers, and someone beside them through the decisions that make a space feel truly finished.',
+    images: [
+      { src: interiors01, alt: 'Editorial interior with layered furnishings and warm architectural detail' },
+      { src: interiors02, alt: 'Complete interior room with furniture, textiles, and artwork' }
+    ]
+  }
+];
 ---
 
-<BaseLayout title="Services | Bandit Collective" pathname="/services">
-  <PlaceholderPage
-    title="Services shaped around consults, full interiors, and everything in between."
-    body="This page is set up as a polished placeholder for the first launch. It is ready to expand into a full services narrative with process, packages, and inquiry pathways once the homepage and portfolio are in place."
-  />
+<BaseLayout
+  title="Services | Bandit Collective"
+  description="Interior design consultations and full-service interiors by The Bandit Collective."
+  pathname="/services"
+>
+  <section class="services-hero shell">
+    <p>
+      Design support for the room you are refining, the home you are
+      reimagining, or the story you are ready to tell fully.
+    </p>
+  </section>
+
+  <section class="services-list" aria-label="Service offerings">
+    {services.map((service, serviceIndex) => (
+      <article class="service shell" data-service-gallery>
+        <div class="service__media">
+          {service.images.map((image, imageIndex) => (
+            <Image
+              class={`service__image${imageIndex === 0 ? ' is-active' : ''}`}
+              src={image.src}
+              alt={image.alt}
+              format="webp"
+              quality={82}
+              loading={serviceIndex === 0 && imageIndex === 0 ? 'eager' : 'lazy'}
+              fetchpriority={serviceIndex === 0 && imageIndex === 0 ? 'high' : 'low'}
+              decoding={serviceIndex === 0 && imageIndex === 0 ? 'sync' : 'async'}
+              data-service-slide
+            />
+          ))}
+        </div>
+
+        <div class="service__content">
+          <p class="service__eyebrow">{service.eyebrow}</p>
+          <h2>{service.title}</h2>
+          <p class="service__intro">{service.intro}</p>
+          <p>{service.body}</p>
+          <p>{service.note}</p>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <section class="services-cta shell">
+    <p>We would love to hear what's on your mind</p>
+    <button class="services-cta__link" type="button" data-services-modal-open>Let's talk!</button>
+  </section>
+
+  <div class="services-modal" data-services-modal hidden>
+    <div class="services-modal__overlay" data-services-modal-close></div>
+    <div
+      class="services-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="services-modal-title"
+    >
+      <button
+        class="services-modal__close"
+        type="button"
+        aria-label="Close contact form"
+        data-services-modal-close
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      <h2 id="services-modal-title">Start your story</h2>
+      <form class="services-modal__form" data-services-contact-form data-endpoint={endpoint}>
+        <div class="services-modal__field">
+          <input type="text" name="name" placeholder="Name" autocomplete="name" required />
+        </div>
+
+        <div class="services-modal__field">
+          <input type="email" name="email" placeholder="Email" autocomplete="email" required />
+        </div>
+
+        <div class="services-modal__field">
+          <input type="tel" name="phone" placeholder="Phone, optional" autocomplete="tel" />
+        </div>
+
+        <div class="services-modal__field services-modal__field--textarea">
+          <textarea name="message" rows="4" placeholder="Tell us about your space" required></textarea>
+        </div>
+
+        <div class="services-modal__actions">
+          <button type="submit" class="services-modal__submit">
+            <span>Send it our way</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </button>
+          <p class="services-modal__status" data-services-contact-status>
+            {endpoint
+              ? ''
+              : 'Add PUBLIC_FORMSPREE_ENDPOINT to activate this form.'}
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
 </BaseLayout>
+
+<script is:inline>
+  const serviceGalleries = document.querySelectorAll('[data-service-gallery]');
+
+  serviceGalleries.forEach((gallery) => {
+    const slides = Array.from(gallery.querySelectorAll('[data-service-slide]'));
+    if (slides.length < 2) return;
+
+    let activeIndex = 0;
+
+    window.setInterval(() => {
+      activeIndex = (activeIndex + 1) % slides.length;
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('is-active', index === activeIndex);
+      });
+    }, 4300);
+  });
+
+  const servicesModal = document.querySelector('[data-services-modal]');
+  const servicesModalOpen = document.querySelector('[data-services-modal-open]');
+  const servicesModalCloseButtons = document.querySelectorAll('[data-services-modal-close]');
+  const servicesModalPanel = servicesModal?.querySelector('.services-modal__panel');
+  const servicesContactForm = document.querySelector('[data-services-contact-form]');
+
+  const openServicesModal = () => {
+    if (!servicesModal) return;
+    servicesModal.removeAttribute('hidden');
+    document.body.classList.add('services-modal-is-open');
+    window.requestAnimationFrame(() => {
+      servicesModal.classList.add('is-open');
+      servicesModalPanel?.querySelector('input, textarea, button')?.focus();
+    });
+  };
+
+  const closeServicesModal = () => {
+    if (!servicesModal) return;
+    servicesModal.classList.remove('is-open');
+    document.body.classList.remove('services-modal-is-open');
+    window.setTimeout(() => {
+      servicesModal.setAttribute('hidden', '');
+      servicesModalOpen?.focus();
+    }, 220);
+  };
+
+  servicesModalOpen?.addEventListener('click', openServicesModal);
+  servicesModalCloseButtons.forEach((button) => {
+    button.addEventListener('click', closeServicesModal);
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && servicesModal?.classList.contains('is-open')) {
+      closeServicesModal();
+    }
+  });
+
+  if (servicesContactForm) {
+    const endpoint = servicesContactForm.getAttribute('data-endpoint');
+    const status = servicesContactForm.querySelector('[data-services-contact-status]');
+    const submitter = servicesContactForm.querySelector('button[type="submit"]');
+
+    servicesContactForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!endpoint) {
+        if (status) status.textContent = 'This form is ready, but it needs a Formspree endpoint before launch.';
+        return;
+      }
+
+      submitter?.setAttribute('disabled', 'true');
+      if (status) status.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(servicesContactForm)
+        });
+
+        if (!response.ok) throw new Error('Submission failed');
+        servicesContactForm.reset();
+        if (status) status.textContent = "Sent. We'll be in touch!";
+      } catch (error) {
+        if (status) status.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
+      } finally {
+        submitter?.removeAttribute('disabled');
+      }
+    });
+  }
+</script>
+
+<style>
+  .services-hero {
+    display: grid;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: clamp(6rem, 10vw, 9rem) 0 clamp(4rem, 7vw, 6.5rem);
+    text-align: center;
+  }
+
+  .services-hero h1 {
+    max-width: 58rem;
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 7vw, 7.2rem);
+    font-weight: 700;
+    line-height: 0.92;
+  }
+
+  .services-hero p:not(.eyebrow) {
+    max-width: 68rem;
+    margin: 0;
+    color: var(--color-muted);
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 2vw, 2rem);
+    line-height: 1.35;
+  }
+
+  .services-list {
+    display: grid;
+    gap: clamp(5rem, 9vw, 9rem);
+    padding-bottom: clamp(5rem, 9vw, 8rem);
+  }
+
+  .service {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(22rem, 0.78fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 6.5rem);
+  }
+
+  .service:nth-child(even) {
+    grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 0.92fr);
+  }
+
+  .service:nth-child(even) .service__media {
+    order: 2;
+  }
+
+  .service__media {
+    position: relative;
+    height: clamp(26rem, calc(100svh - 10rem), 40rem);
+    min-height: 0;
+    overflow: clip;
+    background: var(--color-surface);
+  }
+
+  .service__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1200ms ease-in-out;
+  }
+
+  .service__image.is-active {
+    opacity: 1;
+  }
+
+  .service__content {
+    display: grid;
+    gap: clamp(0.9rem, 1.2vw, 1.15rem);
+    max-width: 38rem;
+  }
+
+  .service__eyebrow {
+    margin: 0;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .service__content h2 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 2.25vw, 2.4rem);
+    font-weight: 700;
+    line-height: 0.95;
+  }
+
+  .service__content p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+    line-height: 1.72;
+  }
+
+  .service__content .service__intro {
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: clamp(1.3rem, 1.8vw, 1.85rem);
+    line-height: 1.3;
+  }
+
+  .services-cta {
+    display: grid;
+    justify-items: center;
+    gap: 1.75rem;
+    padding: clamp(4rem, 8vw, 7rem) 0 clamp(5rem, 9vw, 8rem);
+    border-top: 1px solid var(--color-line);
+    text-align: center;
+  }
+
+  .services-cta p {
+    max-width: 68rem;
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 2vw, 2rem);
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  .services-cta__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1rem;
+    padding: 0.85rem 1.35rem;
+    border: 1px solid rgba(43, 43, 43, 0.28);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      background-color 220ms ease,
+      border-color 220ms ease,
+      color 220ms ease,
+      transform 220ms var(--ease-luxury);
+  }
+
+  .services-cta__link:hover,
+  .services-cta__link:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #fdfbf7;
+  }
+
+  .services-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: var(--page-pad);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  .services-modal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .services-modal[hidden] {
+    display: none;
+  }
+
+  .services-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(6px);
+  }
+
+  .services-modal__panel {
+    position: relative;
+    width: min(calc(100vw - (var(--page-pad) * 2)), 42rem);
+    max-height: calc(100svh - (var(--page-pad) * 2));
+    overflow-y: auto;
+    padding: clamp(2.25rem, 5vw, 3.5rem);
+    background: var(--color-bg);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+    transform: translateY(0.75rem);
+    transition: transform 220ms var(--ease-luxury);
+  }
+
+  .services-modal.is-open .services-modal__panel {
+    transform: translateY(0);
+  }
+
+  .services-modal__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 2rem;
+    line-height: 1;
+    transition: color 220ms ease, background-color 220ms ease;
+  }
+
+  .services-modal__close:hover,
+  .services-modal__close:focus-visible {
+    background: rgba(43, 43, 43, 0.06);
+    color: var(--color-accent);
+  }
+
+  .services-modal__panel h2 {
+    margin: 0 0 2.75rem;
+    padding-right: 2.5rem;
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
+
+  .services-modal__field {
+    margin-bottom: 1.7rem;
+  }
+
+  .services-modal__field input,
+  .services-modal__field textarea {
+    width: 100%;
+    padding: 0.75rem 0;
+    border: 0;
+    border-bottom: 1px solid rgba(43, 43, 43, 0.2);
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: border-color 220ms ease, padding-bottom 220ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .services-modal__field input::placeholder,
+  .services-modal__field textarea::placeholder {
+    color: rgba(43, 43, 43, 0.5);
+    opacity: 1;
+  }
+
+  .services-modal__field input:focus,
+  .services-modal__field textarea:focus {
+    outline: none;
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: calc(0.75rem - 1px);
+  }
+
+  .services-modal__field textarea {
+    min-height: 6.25rem;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .services-modal__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .services-modal__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0 0.5rem;
+    border: 0;
+    border-bottom: 1px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-style: italic;
+    transition: color 220ms ease, gap 220ms var(--ease-luxury);
+  }
+
+  .services-modal__submit:hover,
+  .services-modal__submit:focus-visible {
+    color: var(--color-accent);
+    gap: 0.75rem;
+  }
+
+  .services-modal__submit[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  .services-modal__status {
+    margin: 0;
+    color: rgba(43, 43, 43, 0.6);
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  :global(body.services-modal-is-open) {
+    overflow: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .service,
+    .service:nth-child(even) {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .service:nth-child(even) .service__media {
+      order: 0;
+    }
+
+    .service__content {
+      max-width: 100%;
+    }
+
+    .service__media {
+      min-height: auto;
+      aspect-ratio: 4 / 5;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .services-hero {
+      padding: 4.5rem 0 3.5rem;
+      text-align: left;
+      justify-items: start;
+    }
+
+    .services-hero h1 {
+      font-size: clamp(3rem, 14vw, 4.6rem);
+    }
+
+    .services-list {
+      gap: 4.25rem;
+      padding-bottom: 4.5rem;
+    }
+
+    .service {
+      width: 100%;
+    }
+
+    .service__content {
+      width: min(calc(100% - (var(--page-pad) * 2)), var(--max-shell));
+      margin: 0 auto;
+    }
+
+    .services-cta {
+      padding: 3.75rem 0 5rem;
+    }
+  }
+</style>

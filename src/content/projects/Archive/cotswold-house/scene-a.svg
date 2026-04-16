@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#d8cbbe" />
+  <rect x="180" y="170" width="1240" height="520" rx="30" fill="#f5eee6" />
+  <rect x="1030" y="250" width="220" height="300" rx="20" fill="#b98567" opacity="0.54" />
+  <text x="180" y="900" fill="#655046" font-family="Georgia, serif" font-size="90">Cotswold House</text>
+</svg>

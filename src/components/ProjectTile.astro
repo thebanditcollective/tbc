@@ -9,12 +9,13 @@ type TileImage = {
 type Props = {
   href: string;
   title: string;
-  location: string;
-  year: number;
+  location?: string;
+  year?: number;
   images: TileImage[];
 };
 
 const { href, title, location, year, images } = Astro.props;
+const meta = [location, year].filter(Boolean).join(', ');
 ---
 
 <a class="project-tile" href={href}>
@@ -23,7 +24,7 @@ const { href, title, location, year, images } = Astro.props;
   </div>
   <div class="project-tile__meta">
     <h2>{title}</h2>
-    <p>{location}, {year}</p>
+    {meta && <p>{meta}</p>}
   </div>
 </a>
 

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import CrossfadeStack from '../../../components/CrossfadeStack.astro';
+import { Image } from 'astro:assets';
 import { getProjects, getProjectBySlug } from '../../../lib/content';
 import { withBase } from '../../../lib/paths';
 
@@ -20,41 +20,49 @@ if (!project) {
 
 const projects = await getProjects();
 const nextProject = projects.find((item) => item.slug === project.data.nextProjectSlug) ?? projects[0];
+const meta = [project.data.location, project.data.year].filter(Boolean).join(' / ');
 ---
 
-  <BaseLayout
+<BaseLayout
   title={`${project.data.title} | Bandit Collective`}
   description={project.data.shortDescription}
   pathname={`/interiors/${project.slug}`}
 >
   <article class="case-study">
-    <section class="case-study__hero">
-      <CrossfadeStack
-        className="case-study__hero-slideshow"
-        images={project.data.heroImages.map((image) => ({
-          src: image.src,
-          alt: `${project.data.title} hero image`
-        }))}
-        interval={4000}
-      />
-    </section>
-
     <section class="case-study__header shell">
       <a class="case-study__back" href={withBase('/interiors')}>Back to Interiors</a>
       <h1>{project.data.title}</h1>
-      <p class="case-study__meta">{project.data.location} / {project.data.year}</p>
+      {meta && <p class="case-study__meta">{meta}</p>}
       <p class="case-study__description">{project.data.shortDescription}</p>
     </section>
 
     <section class="case-study__story">
       {project.data.storyImages.map((image, index) => (
-        <div class:list={['case-study__story-item', { 'is-full-bleed': index === 0 }]}>
-          <img
-            src={image.src}
+        <figure class="case-study__story-item">
+          <Image
+            src={image}
             alt={`${project.data.title} story image ${index + 1}`}
             loading={index === 0 ? 'eager' : 'lazy'}
+            quality={80}
           />
-        </div>
+        </figure>
+      ))}
+
+      {project.data.diptychs?.map((diptych, index) => (
+        <figure class="case-study__diptych">
+          <Image
+            src={diptych.left}
+            alt={`${project.data.title} diptych ${index + 1}, left image`}
+            loading="lazy"
+            quality={80}
+          />
+          <Image
+            src={diptych.right}
+            alt={`${project.data.title} diptych ${index + 1}, right image`}
+            loading="lazy"
+            quality={80}
+          />
+        </figure>
       ))}
     </section>
 
@@ -69,25 +77,15 @@ const nextProject = projects.find((item) => item.slug === project.data.nextProje
 
 <style>
   .case-study {
+    padding-top: 96px;
     padding-bottom: 96px;
-  }
-
-  .case-study__hero {
-    height: min(90vh, 900px);
-    min-height: 620px;
-    overflow: hidden;
-    background: var(--color-surface);
-  }
-
-  .case-study__hero-slideshow {
-    height: 100%;
   }
 
   .case-study__header {
     display: grid;
     gap: 0.8rem;
-    padding-top: 3rem;
-    padding-bottom: 4rem;
+    padding-top: 4rem;
+    padding-bottom: 5rem;
   }
 
   .case-study__back {
@@ -121,22 +119,27 @@ const nextProject = projects.find((item) => item.slug === project.data.nextProje
 
   .case-study__story {
     display: grid;
-    gap: 80px;
+    gap: 72px;
   }
 
   .case-study__story-item {
-    width: min(1000px, calc(100% - 16vw));
+    width: min(1120px, calc(100% - 16vw));
     margin: 0 auto;
   }
 
-  .case-study__story-item img {
+  .case-study__story-item img,
+  .case-study__diptych img {
+    display: block;
     width: 100%;
     height: auto;
-    object-fit: cover;
   }
 
-  .case-study__story-item.is-full-bleed {
-    width: 100%;
+  .case-study__diptych {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+    width: min(1120px, calc(100% - 16vw));
+    margin: 0 auto;
   }
 
   .case-study__next {
@@ -159,15 +162,37 @@ const nextProject = projects.find((item) => item.slug === project.data.nextProje
   }
 
   .case-study__next strong {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: 0.86rem;
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (min-width: 721px) {
+    .case-study__story-item {
+      display: grid;
+      justify-items: center;
+    }
+
+    .case-study__story-item img,
+    .case-study__diptych img {
+      width: auto;
+      max-width: 100%;
+      max-height: calc(100svh - 120px);
+    }
+
+    .case-study__diptych {
+      align-items: center;
+    }
+
+    .case-study__diptych img {
+      justify-self: center;
+    }
   }
 
   @media (max-width: 720px) {
-    .case-study__hero {
-      height: 70vh;
-      min-height: 480px;
+    .case-study {
+      padding-top: 72px;
     }
 
     .case-study__header {
@@ -179,8 +204,13 @@ const nextProject = projects.find((item) => item.slug === project.data.nextProje
     }
 
     .case-study__story-item,
-    .case-study__story-item.is-full-bleed {
+    .case-study__diptych {
       width: calc(100% - (var(--page-pad) * 2));
+    }
+
+    .case-study__diptych {
+      grid-template-columns: 1fr;
+      gap: 24px;
     }
 
     .case-study__next {
