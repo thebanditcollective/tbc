@@ -154,6 +154,10 @@ const slides = [
   };
 
   const closeLookbookLightbox = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     document.body.classList.remove('has-lookbook-lightbox');
     lookbookLightbox?.setAttribute('aria-hidden', 'true');
     if (lookbookLightboxImage) {
@@ -182,6 +186,7 @@ const slides = [
       syncLookbookLightbox();
       lookbookLightbox.setAttribute('aria-hidden', 'false');
       document.body.classList.add('has-lookbook-lightbox');
+      lookbookLightboxClose?.focus({ preventScroll: true });
     });
   });
 

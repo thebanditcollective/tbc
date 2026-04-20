@@ -145,10 +145,15 @@ Current intended behavior:
 
 - Site title is `THE BANDIT COLLECTIVE`, all caps.
 - Header is fixed.
-- Home page starts transparent over the hero.
-- Other pages start with the existing filled header color.
+- The brand/logo link returns to `/`; there is no separate `Home` navigation item.
+- On desktop, the non-scrolled header background is transparent across pages.
+- On mobile, the home page starts transparent over the hero, while non-home pages keep the existing filled header color unless they use the page-background variant.
 - Pages that pass `pageBackgroundColor` or `pageBackgroundImage` to `BaseLayout` use the page-background variant: the header is transparent over the page background, with white header/nav/toggle text.
+- On desktop, the brand and primary nav font sizes were reduced by 25% from the earlier large-header treatment.
 - On scroll, the header smoothly transitions to `rgba(0, 0, 0, 0.3)`.
+- Scroll state is top/not-top: the header shrinks when the user scrolls away from the top and stays shrunk while scrolling upward until `window.scrollY` returns to the top.
+- The scrolled header remains smaller than the non-scrolled header, but was increased after the first pass so it is not cramped: desktop scrolled inner height is `51px`, mobile scrolled inner height is `48px`.
+- Header contents should stay vertically centered in the scrolled state; do not reintroduce a scroll-based upward `transform` on `.site-header__inner`.
 - Header text/nav/toggle stay white in the scrolled state.
 - Header background transition is driven by a `--header-scroll-progress` CSS variable updated in inline JS.
 - Primary nav links currently include Interiors, Services, Shop, and Contact. The brand link returns home.
@@ -284,6 +289,27 @@ Current intended behavior:
 - Earlier iterations tried a contact background image and a tassel decoration; both were removed. The image file may still exist in `src/assets/images/contact/contact-background.jpg`, but it is not currently imported by `/contact`.
 - Header/footer white overlay styling for this page comes from `BaseLayout`'s page-background variant.
 
+### Shop Page
+
+File: `src/pages/shop.astro`
+
+Current intended behavior:
+
+- `/shop` is no longer a generic placeholder page.
+- It uses a plain background and presents a compact coming-soon message for the future shop.
+- Current page copy:
+  - `The Shop Is Coming Soon`
+  - `A collected edit of antique furniture, vintage finds, and one-of-a-kind pieces for the home.`
+  - `We are gathering pieces slowly and thoughtfully, from markets, dealers, and travels near and far. Each piece will be chosen for its character, craftsmanship, and the quiet history it brings into a home.`
+  - `Looking For Something Specific?`
+  - `We welcome sourcing inquiries for antique furniture, vintage objects, and characterful pieces for the home.`
+- The earlier `Shop` eyebrow/title above the main heading was removed.
+- All shop-page text is centered.
+- All shop-page text uses the same `1rem` font size, matching the smallest text size from the first pass.
+- Spacing was reduced so the page content, fixed header, and footer are intended to be visible together in one viewport without scrolling on normal desktop viewports.
+- The sourcing inquiry link remains and routes to `/contact` via `withBase('/contact')`.
+- The shop page imports `withBase` from `src/lib/paths.ts` for the contact link and does not use `PlaceholderPage.astro`.
+
 ### HomePressStrip
 
 File: `src/components/HomePressStrip.astro`
@@ -305,8 +331,10 @@ File: `src/layouts/BaseLayout.astro`
 
 Current intended behavior:
 
+- Footer vertical padding was reduced to `1rem 0`, roughly half of the previous footer height.
+- Content is: `New York, NY`, `banditcollective.nyc@gmail.com` as a mailto link, Instagram icon/link, and `(c) TBC 2026`, separated by dividers on wider screens.
+- The Instagram icon links to `https://www.instagram.com/thebandit.collective` and keeps screen-reader text for accessibility.
 - Footer content uses the shared `.shell` width and is left-aligned.
-- Content is: `New York, NY`, email link, Instagram icon/link, and `© TBC 2026`, separated by dividers on wider screens.
 - On mobile, dividers hide and content wraps within a narrow left-aligned footer.
 - Pages using the `BaseLayout` page-background variant, including `/contact`, render footer text/links in warm white over the page background.
 
@@ -474,6 +502,9 @@ The active refinement thread is focused on the homepage, especially section spac
 
 Most recent completed requests:
 
+- Header desktop typography was reduced, desktop non-scrolled background was removed, scroll behavior now shrinks on any non-top scroll position, and the scrolled header content was re-centered vertically.
+- The separate `Home` nav item was removed; the brand/logo remains the home link.
+- Footer height was reduced, footer content moved left, and the footer copy now uses New York location, email link, Instagram icon link, and `(c) TBC 2026`.
 - Header text/opacity/scroll behavior updated.
 - Wix reference sections rebuilt as Astro components.
 - Home statement widened so the headline breaks into two intended lines.
@@ -490,7 +521,11 @@ Most recent completed requests:
 - `HomeLookbook` lightbox/expanded image behavior was preserved, but the overlay padding was adjusted so the expanded image sits lower and is balanced between the bottom of the fixed header and bottom of the viewport.
 - Contact navigation now routes to the standalone `/contact` page instead of opening a site-wide popup.
 - The global contact modal in `BaseLayout` was removed.
-- The Services page contact CTA was converted away from the old modal flow during this thread. Check the current `src/pages/services.astro` before making further service-page assumptions because there are additional uncommitted service-page edits.
+- Services page current state: `src/pages/services.astro` is now a one-screen editorial split layout on desktop, intended to keep header, page content, and footer visible without desktop scrolling. Mobile/tablet stacks naturally and may scroll.
+- Services page image: imports `src/assets/images/services/services-01.jpg` through Astro's `Image` component with `format="webp"`, so the built site serves an optimized WebP. The image is shown uncropped with `object-fit: contain`; avoid reintroducing a visible background/frame behind it.
+- Services page content: old stacked `Consultations` / `Full Interiors` sections, image cycling, bottom CTA line, and Services-page-specific contact modal/CTA were removed. The page now shows two service groups: `Interior Design & Decorating` with `Residential Design` and `Commercial Design`, and `Consultations` with `Color` and `Lighting`.
+- Services page copy: `Interior Design & Decorating` tagline is `A considered approach to spaces that need a complete point of view, from the initial design to the final layer.` `Consultations` tagline is `Focused guidance for the details that shape how a space comes together.`
+- Services page layout notes: the image container is sized to the source portrait aspect ratio to prevent the cream page background from appearing as a frame around the uncropped image. The text column was moved closer to the image, text was resized after review, and extra vertical space was added between the two service groups.
 - `/contact` now uses a solid page background color `#A69401` through `BaseLayout`'s page-background variant.
 - `/contact` uses `HomeContact` in standalone mode with no heading, visible direct email, a translucent blurred form overlay, and slightly increased spacing between form fields/actions.
 - The canonical contact email used in form fallback/status text is `banditcollective.nyc@gmail.com`.
