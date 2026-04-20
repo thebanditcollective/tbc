@@ -79,21 +79,11 @@ const slides = [
           </article>
         ))}
 
-        <article class="home-lookbook__card home-lookbook__card--end" data-home-lookbook-card>
-          <div class="home-lookbook__end-content">
-            <span>See the complete story</span>
-            <a class="home-lookbook__end-arrow" href={withBase('/interiors')} aria-label="View interiors">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </a>
-          </div>
-        </article>
       </div>
     </div>
 
     <div class="home-lookbook__dots" data-home-lookbook-dots>
-      {[...slides, null].map((_, index) => (
+      {slides.map((_, index) => (
         <button
           class:list={['home-lookbook__dot', { 'is-active': index === 0 }]}
           type="button"
@@ -234,8 +224,6 @@ const slides = [
     const nextButton = lookbook.querySelector('[data-home-lookbook-next]');
     const dotsContainer = lookbook.parentElement?.querySelector('[data-home-lookbook-dots]');
     const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-home-lookbook-dot]')) : [];
-    const finalCard = cards[cards.length - 1];
-    const finalReferenceImage = cards[cards.length - 2]?.querySelector('img');
     const mobileQuery = window.matchMedia('(max-width: 767px)');
     let hasSwiped = false;
     let activeIndex = 0;
@@ -246,20 +234,6 @@ const slides = [
     let suppressNextLightboxClick = false;
 
     if (!track || !cards.length || !dots.length) return;
-
-    const syncFinalCardHeight = () => {
-      if (!finalCard || !finalReferenceImage) return;
-
-      if (!mobileQuery.matches) {
-        finalCard.style.removeProperty('--lookbook-final-card-height');
-        return;
-      }
-
-      const imageHeight = finalReferenceImage.getBoundingClientRect().height;
-      if (imageHeight > 0) {
-        finalCard.style.setProperty('--lookbook-final-card-height', `${imageHeight}px`);
-      }
-    };
 
     const getMaxOffset = () => {
       const lastCard = cards[cards.length - 1];
@@ -400,13 +374,9 @@ const slides = [
     window.addEventListener('resize', () => {
       if (window.innerWidth === lastViewportWidth) return;
       lastViewportWidth = window.innerWidth;
-      syncFinalCardHeight();
       scrollToCard(activeIndex);
     });
-    mobileQuery.addEventListener('change', syncFinalCardHeight);
-    finalReferenceImage?.addEventListener('load', syncFinalCardHeight, { once: true });
 
-    syncFinalCardHeight();
     update();
   });
 </script>
@@ -439,7 +409,7 @@ const slides = [
     display: flex;
     gap: 0.875rem;
     width: 100%;
-    padding: 0 clamp(0.625rem, 0.55vw, 0.875rem) 1rem clamp(1.25rem, 5.35vw, 6.5rem);
+    padding: 0 0.875rem 1rem;
     touch-action: pan-y;
     user-select: none;
     will-change: transform;
@@ -447,7 +417,7 @@ const slides = [
   }
 
   .home-lookbook__card {
-    flex: 0 0 min(28vw, 32.875rem);
+    flex: 0 0 min(26vw, 29.6rem);
     scroll-snap-align: start;
     opacity: 0.65;
     transition: opacity 280ms ease;
@@ -462,7 +432,6 @@ const slides = [
     width: 100%;
     overflow: hidden;
     aspect-ratio: 4 / 5;
-    height: min(77svh, 41rem);
     background: #eae6e1;
   }
 
@@ -483,7 +452,7 @@ const slides = [
     inset: 0;
     z-index: 100;
     place-items: center;
-    padding: 5vh 5vw;
+    padding: calc(5vh + 51px) 5vw 5vh;
     background: rgba(0, 0, 0, 0.7);
   }
 
@@ -749,7 +718,7 @@ const slides = [
 
   @media (min-width: 768px) {
     .home-lookbook__card {
-      flex-basis: min(28vw, 32.875rem);
+      flex-basis: min(26vw, 29.6rem);
       opacity: 1;
     }
 
@@ -783,7 +752,7 @@ const slides = [
 
   @media (min-width: 1200px) {
     .home-lookbook__card {
-      flex-basis: min(28vw, 32.875rem);
+      flex-basis: min(26vw, 29.6rem);
     }
   }
 
@@ -806,9 +775,9 @@ const slides = [
     .home-lookbook__track {
       overflow-x: auto;
       overflow-y: hidden;
-      padding-right: 0;
-      padding-left: 0;
       gap: 0.5rem;
+      padding-right: 0.5rem;
+      padding-left: 0.5rem;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       touch-action: pan-x pan-y;
@@ -825,11 +794,6 @@ const slides = [
     .home-lookbook__card {
       flex-basis: 89vw;
       scroll-snap-align: start;
-    }
-
-    .home-lookbook__card--end {
-      height: var(--lookbook-final-card-height, auto);
-      scroll-snap-align: end;
     }
 
     .home-lookbook__image-frame {

@@ -4,7 +4,6 @@ location: "New York, NY"
 shortDescription: "A city apartment composed with a restrained palette, tailored furnishings, and intimate architectural moments."
 coverImages:
   - ./cover/01.jpg
-  - ./cover/02.jpg
 storyImages:
   - ./story/01.jpg
   - ./story/02.jpg

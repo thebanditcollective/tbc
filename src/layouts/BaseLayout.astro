@@ -6,31 +6,37 @@ type Props = {
   title?: string;
   description?: string;
   pathname?: string;
+  pageBackgroundImage?: string;
+  pageBackgroundColor?: string;
+  pageBackgroundPosition?: string;
+  pageBackgroundOverlay?: number;
 };
 
 const {
   title = 'The Bandit Collective',
   description = 'Editorial interiors portfolio for The Bandit Collective.',
-  pathname = '/'
+  pathname = '/',
+  pageBackgroundImage,
+  pageBackgroundColor,
+  pageBackgroundPosition = 'center center',
+  pageBackgroundOverlay = 0.55
 } = Astro.props;
 
 const siteUrl = Astro.site ? new URL(pathname, Astro.site).toString() : undefined;
 const isHome = pathname === '/';
+const hasPageBackground = Boolean(pageBackgroundImage || pageBackgroundColor);
 const desktopNavItems = [
-  { href: '/', label: 'Home' },
   { href: '/interiors', label: 'Interiors' },
   { href: '/services', label: 'Services' },
   { href: '/shop', label: 'Shop' },
   { href: '/contact', label: 'Contact' }
 ];
 const mobileNavItems = [
-  { href: '/', label: 'Home' },
   { href: '/interiors', label: 'Interiors' },
   { href: '/services', label: 'Services' },
   { href: '/contact', label: 'Contact' }
 ];
 const instagramUrl = 'https://www.instagram.com/thebandit.collective';
-const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
 ---
 
 <!doctype html>
@@ -49,20 +55,26 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
       rel="stylesheet"
     />
   </head>
-  <body class:list={['site-body', { 'is-home': isHome }]}>
-    <header class:list={['site-header', { 'is-home': isHome }]} data-site-header>
+  <body
+    class:list={['site-body', { 'is-home': isHome, 'has-page-background': hasPageBackground }]}
+    style={pageBackgroundColor ? `--page-background-color: ${pageBackgroundColor};` : undefined}
+  >
+    {pageBackgroundImage && (
+      <div
+        class="site-page-background"
+        aria-hidden="true"
+        style={`--page-background-overlay: ${pageBackgroundOverlay}; --page-background-position: ${pageBackgroundPosition};`}
+      >
+        <img src={pageBackgroundImage} alt="" loading="eager" decoding="sync" />
+      </div>
+    )}
+
+    <header class:list={['site-header', { 'is-home': isHome, 'has-page-background': hasPageBackground }]} data-site-header>
       <div class="site-header__inner">
         <a class="site-header__brand" href={withBase('/')}>The Bandit Collective</a>
         <nav class="site-header__nav" aria-label="Primary navigation">
           {desktopNavItems.map((item) => {
             const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            if (item.href === '/contact') {
-              return (
-                <button class="site-header__link site-header__link--button" type="button" data-site-contact-open>
-                  {item.label}
-                </button>
-              );
-            }
             return (
               <a class:list={['site-header__link', { 'is-active': active }]} href={withBase(item.href)}>
                 {item.label}
@@ -89,17 +101,6 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
         <nav class="site-header__mobile-nav shell" aria-label="Mobile navigation">
           {mobileNavItems.map((item) => {
             const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            if (item.href === '/contact') {
-              return (
-                <button
-                  class="site-header__mobile-link site-header__mobile-link--button"
-                  type="button"
-                  data-site-contact-open
-                >
-                  {item.label}
-                </button>
-              );
-            }
             return (
               <a class:list={['site-header__mobile-link', { 'is-active': active }]} href={withBase(item.href)}>
                 {item.label}
@@ -113,70 +114,22 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
       <slot />
     </main>
 
-    <div class="site-contact-modal" data-site-contact-modal hidden>
-      <div class="site-contact-modal__overlay" data-site-contact-close></div>
-      <div
-        class="site-contact-modal__panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="site-contact-modal-title"
-      >
-        <button
-          class="site-contact-modal__close"
-          type="button"
-          aria-label="Close contact form"
-          data-site-contact-close
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-
-        <h2 id="site-contact-modal-title">Start your story</h2>
-        <form class="site-contact-modal__form" data-site-contact-form data-endpoint={contactEndpoint}>
-          <div class="site-contact-modal__field">
-            <input type="text" name="name" placeholder="Name" autocomplete="name" required />
-          </div>
-
-          <div class="site-contact-modal__field">
-            <input type="email" name="email" placeholder="Email" autocomplete="email" required />
-          </div>
-
-          <div class="site-contact-modal__field">
-            <input type="tel" name="phone" placeholder="Phone, optional" autocomplete="tel" />
-          </div>
-
-          <div class="site-contact-modal__field site-contact-modal__field--textarea">
-            <textarea name="message" rows="4" placeholder="Tell us about your space" required></textarea>
-          </div>
-
-          <div class="site-contact-modal__actions">
-            <button type="submit" class="site-contact-modal__submit">
-              <span>Send it our way</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </button>
-            <p class="site-contact-modal__status" data-site-contact-status>
-              {contactEndpoint
-                ? ''
-                : 'Add PUBLIC_FORMSPREE_ENDPOINT to activate this form.'}
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <footer class="site-footer">
+    <footer class:list={['site-footer', { 'has-page-background': hasPageBackground }]}>
       <div class="shell site-footer__inner">
+        <span>New York, NY</span>
+        <span class="site-footer__divider" aria-hidden="true">|</span>
+        <a href="mailto:banditcollective.nyc@gmail.com">banditcollective.nyc@gmail.com</a>
+        <span class="site-footer__divider" aria-hidden="true">|</span>
         <a class="site-footer__instagram" href={instagramUrl} target="_blank" rel="noreferrer">
           <svg class="site-footer__instagram-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7" />
             <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7" />
             <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
           </svg>
-          <span>Follow us on Instagram</span>
+          <span class="sr-only">Instagram</span>
         </a>
         <span class="site-footer__divider" aria-hidden="true">|</span>
-        <p class="site-footer__copyright">&copy; 2025 Bandit Collective. All Rights Reserved.</p>
+        <p class="site-footer__copyright">&copy; TBC 2026</p>
       </div>
     </footer>
 
@@ -185,19 +138,13 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
       const toggle = document.querySelector('[data-menu-toggle]');
       const mobileMenu = document.querySelector('[data-mobile-menu]');
       const mobileLinks = mobileMenu ? mobileMenu.querySelectorAll('a') : [];
-      const siteContactModal = document.querySelector('[data-site-contact-modal]');
-      const siteContactOpenButtons = document.querySelectorAll('[data-site-contact-open]');
-      const siteContactCloseButtons = document.querySelectorAll('[data-site-contact-close]');
-      const siteContactPanel = siteContactModal?.querySelector('.site-contact-modal__panel');
-      const siteContactForm = document.querySelector('[data-site-contact-form]');
-      const scrollRange = 180;
       let menuCloseTimer;
 
       const syncHeader = () => {
         if (!header) return;
-        const progress = Math.min(window.scrollY / scrollRange, 1);
-        header.classList.toggle('is-scrolled', progress > 0.08);
-        header.style.setProperty('--header-scroll-progress', progress.toFixed(3));
+        const isScrolled = window.scrollY > 1;
+        header.classList.toggle('is-scrolled', isScrolled);
+        header.style.setProperty('--header-scroll-progress', isScrolled ? '1' : '0');
       };
 
       const closeMenu = () => {
@@ -227,78 +174,6 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
 
       mobileLinks.forEach((link) => link.addEventListener('click', closeMenu));
 
-      const openSiteContactModal = () => {
-        if (!siteContactModal) return;
-        closeMenu();
-        siteContactModal.removeAttribute('hidden');
-        document.body.classList.add('site-contact-modal-is-open');
-        window.requestAnimationFrame(() => {
-          siteContactModal.classList.add('is-open');
-          siteContactPanel?.querySelector('input, textarea, button')?.focus();
-        });
-      };
-
-      const closeSiteContactModal = () => {
-        if (!siteContactModal) return;
-        siteContactModal.classList.remove('is-open');
-        document.body.classList.remove('site-contact-modal-is-open');
-        window.setTimeout(() => {
-          siteContactModal.setAttribute('hidden', '');
-        }, 220);
-      };
-
-      siteContactOpenButtons.forEach((button) => {
-        button.addEventListener('click', openSiteContactModal);
-      });
-
-      siteContactCloseButtons.forEach((button) => {
-        button.addEventListener('click', closeSiteContactModal);
-      });
-
-      window.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && siteContactModal?.classList.contains('is-open')) {
-          closeSiteContactModal();
-        }
-      });
-
-      if (siteContactForm) {
-        const siteContactEndpoint = siteContactForm.getAttribute('data-endpoint');
-        const siteContactStatus = siteContactForm.querySelector('[data-site-contact-status]');
-        const siteContactSubmitter = siteContactForm.querySelector('button[type="submit"]');
-
-        siteContactForm.addEventListener('submit', async (event) => {
-          event.preventDefault();
-
-          if (!siteContactEndpoint) {
-            if (siteContactStatus) {
-              siteContactStatus.textContent = 'This form is ready, but it needs a Formspree endpoint before launch.';
-            }
-            return;
-          }
-
-          siteContactSubmitter?.setAttribute('disabled', 'true');
-          if (siteContactStatus) siteContactStatus.textContent = 'Sending...';
-
-          try {
-            const response = await fetch(siteContactEndpoint, {
-              method: 'POST',
-              headers: { Accept: 'application/json' },
-              body: new FormData(siteContactForm)
-            });
-
-            if (!response.ok) throw new Error('Submission failed');
-            siteContactForm.reset();
-            if (siteContactStatus) siteContactStatus.textContent = "Sent. We'll be in touch!";
-          } catch (error) {
-            if (siteContactStatus) {
-              siteContactStatus.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
-            }
-          } finally {
-            siteContactSubmitter?.removeAttribute('disabled');
-          }
-        });
-      }
-
       window.addEventListener('scroll', syncHeader, { passive: true });
       window.addEventListener('resize', () => {
         if (window.innerWidth > 860) closeMenu();
@@ -327,7 +202,7 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     left: 0;
     right: 0;
     z-index: 20;
-    background: rgba(var(--header-red), var(--header-green), var(--header-blue), var(--header-alpha));
+    background-color: rgba(var(--header-red), var(--header-green), var(--header-blue), var(--header-alpha));
     transition:
       background-color 280ms ease,
       backdrop-filter 280ms ease,
@@ -358,6 +233,7 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     min-height: 78px;
     width: min(calc(100% - 2.5rem), 100%);
     margin: 0 auto;
+    transition: min-height 320ms var(--ease-luxury);
   }
 
   .site-header__brand {
@@ -387,10 +263,6 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     letter-spacing: 0.06em;
     text-transform: uppercase;
     transition: color 280ms ease;
-  }
-
-  .site-header__link--button {
-    cursor: pointer;
   }
 
   .site-header__link::after {
@@ -438,6 +310,10 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     display: none;
   }
 
+  .site-header.is-scrolled .site-header__inner {
+    min-height: 51px;
+  }
+
   .site-header__toggle {
     width: 2.8rem;
     height: 2.8rem;
@@ -462,32 +338,80 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
       transform 260ms var(--ease-luxury);
   }
 
+  :global(.site-body) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global(.site-body.has-page-background) {
+    background: var(--page-background-color, #000);
+  }
+
+  .site-page-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0;
+    animation: pageBackgroundFadeIn 1600ms ease-out 120ms forwards;
+    pointer-events: none;
+  }
+
+  .site-page-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--page-background-position);
+  }
+
+  .site-page-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, var(--page-background-overlay));
+  }
+
+  @keyframes pageBackgroundFadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .site-main {
+    position: relative;
+    z-index: 1;
+    flex: 1 0 auto;
+    min-height: 0;
+  }
+
   .site-main--offset {
     padding-top: 78px;
   }
 
   .site-footer {
-    padding: 2rem 0;
+    position: relative;
+    z-index: 1;
+    padding: 1rem 0;
     border-top: 1px solid var(--color-line);
   }
 
   .site-footer__inner {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.6rem;
     align-items: center;
     margin: 0 auto;
     color: var(--color-muted);
     font-size: 0.95rem;
     line-height: 1.5;
-    text-align: center;
+    text-align: left;
   }
 
   .site-footer__instagram {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
     color: var(--color-text);
     transition: color 220ms ease;
   }
@@ -509,166 +433,49 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     margin: 0;
   }
 
-  .site-contact-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-    display: grid;
-    place-items: center;
-    padding: var(--page-pad);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 220ms ease;
+  .site-header.has-page-background {
+    --header-base-red: 0;
+    --header-base-green: 0;
+    --header-base-blue: 0;
+    --header-base-alpha: 0;
+    border-bottom-color: rgba(253, 251, 247, 0.16);
   }
 
-  .site-contact-modal.is-open {
-    opacity: 1;
-    pointer-events: auto;
+  .site-header.has-page-background .site-header__brand,
+  .site-header.has-page-background .site-header__link {
+    color: #fdfbf7;
   }
 
-  .site-contact-modal[hidden] {
-    display: none;
+  .site-header.has-page-background .site-header__link:hover,
+  .site-header.has-page-background .site-header__link:focus-visible,
+  .site-header.has-page-background .site-header__link.is-active {
+    color: #fdfbf7;
   }
 
-  .site-contact-modal__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.48);
-    backdrop-filter: blur(6px);
+  .site-header.has-page-background .site-header__link::after {
+    background: rgba(253, 251, 247, 0.9);
   }
 
-  .site-contact-modal__panel {
-    position: relative;
-    width: min(calc(100vw - (var(--page-pad) * 2)), 42rem);
-    max-height: calc(100svh - (var(--page-pad) * 2));
-    overflow-y: auto;
-    padding: clamp(2.25rem, 5vw, 3.5rem);
-    background: var(--color-bg);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
-    transform: translateY(0.75rem);
-    transition: transform 220ms var(--ease-luxury);
+  .site-header.has-page-background .site-header__toggle span:not(.sr-only) {
+    background: #fdfbf7;
   }
 
-  .site-contact-modal.is-open .site-contact-modal__panel {
-    transform: translateY(0);
+  .site-footer.has-page-background {
+    border-top-color: rgba(253, 251, 247, 0.22);
   }
 
-  .site-contact-modal__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-text);
-    font-size: 2rem;
-    line-height: 1;
-    transition: color 220ms ease, background-color 220ms ease;
+  .site-footer.has-page-background .site-footer__inner,
+  .site-footer.has-page-background .site-footer__divider,
+  .site-footer.has-page-background a,
+  .site-footer.has-page-background .site-footer__instagram {
+    color: rgba(253, 251, 247, 0.84);
   }
 
-  .site-contact-modal__close:hover,
-  .site-contact-modal__close:focus-visible {
-    background: rgba(43, 43, 43, 0.06);
-    color: var(--color-accent);
-  }
-
-  .site-contact-modal__panel h2 {
-    margin: 0 0 2.75rem;
-    padding-right: 2.5rem;
-    color: var(--color-text);
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    text-align: center;
-  }
-
-  .site-contact-modal__field {
-    margin-bottom: 1.7rem;
-  }
-
-  .site-contact-modal__field input,
-  .site-contact-modal__field textarea {
-    width: 100%;
-    padding: 0.75rem 0;
-    border: 0;
-    border-bottom: 1px solid rgba(43, 43, 43, 0.2);
-    border-radius: 0;
-    background: transparent;
-    color: var(--color-text);
-    font-size: 1rem;
-    transition: border-color 220ms ease, padding-bottom 220ms ease;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .site-contact-modal__field input::placeholder,
-  .site-contact-modal__field textarea::placeholder {
-    color: rgba(43, 43, 43, 0.5);
-    opacity: 1;
-  }
-
-  .site-contact-modal__field input:focus,
-  .site-contact-modal__field textarea:focus {
-    outline: none;
-    border-bottom: 2px solid var(--color-accent);
-    padding-bottom: calc(0.75rem - 1px);
-  }
-
-  .site-contact-modal__field textarea {
-    min-height: 6.25rem;
-    resize: vertical;
-    line-height: 1.6;
-  }
-
-  .site-contact-modal__actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .site-contact-modal__submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 0 0.5rem;
-    border: 0;
-    border-bottom: 1px solid var(--color-accent);
-    background: transparent;
-    color: var(--color-text);
-    font-family: var(--font-heading);
-    font-size: 1.25rem;
-    font-style: italic;
-    transition: color 220ms ease, gap 220ms var(--ease-luxury);
-  }
-
-  .site-contact-modal__submit:hover,
-  .site-contact-modal__submit:focus-visible {
-    color: var(--color-accent);
-    gap: 0.75rem;
-  }
-
-  .site-contact-modal__submit[disabled] {
-    opacity: 0.7;
-    cursor: wait;
-  }
-
-  .site-contact-modal__status {
-    margin: 0;
-    color: rgba(43, 43, 43, 0.6);
-    text-align: center;
-    font-size: 0.875rem;
-  }
-
-  :global(body.site-contact-modal-is-open) {
-    overflow: hidden;
+  .site-footer.has-page-background a:hover,
+  .site-footer.has-page-background a:focus-visible,
+  .site-footer.has-page-background .site-footer__instagram:hover,
+  .site-footer.has-page-background .site-footer__instagram:focus-visible {
+    color: #fdfbf7;
   }
 
   @media (max-width: 860px) {
@@ -679,6 +486,10 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     .site-header__inner {
       min-height: 74px;
       width: min(calc(100% - 1.25rem), 100%);
+    }
+
+    .site-header.is-scrolled .site-header__inner {
+      min-height: 48px;
     }
 
     .site-header__nav {
@@ -750,10 +561,6 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
       text-align: left;
     }
 
-    .site-header__mobile-link--button {
-      cursor: pointer;
-    }
-
     .site-header__mobile-link.is-active {
       color: var(--color-accent);
     }
@@ -770,13 +577,30 @@ const contactEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
 
     .site-footer__instagram,
     .site-footer__copyright {
-      flex-basis: 100%;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     .site-header__brand {
       max-width: none;
       font-size: 1.45rem;
+    }
+  }
+
+  @media (min-width: 861px) {
+    .site-header {
+      --header-base-red: 0;
+      --header-base-green: 0;
+      --header-base-blue: 0;
+      --header-base-alpha: 0;
+      border-bottom-color: transparent;
+    }
+
+    .site-header__brand {
+      font-size: clamp(1.41rem, 1.76vw, 1.76rem);
+    }
+
+    .site-header__link {
+      font-size: 0.88rem;
     }
   }
 </style>

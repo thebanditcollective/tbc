@@ -49,10 +49,6 @@ textarea {
   font: inherit;
 }
 
-main {
-  min-height: 100vh;
-}
-
 .shell {
   width: min(calc(100% - (var(--page-pad) * 2)), var(--max-shell));
   margin: 0 auto;

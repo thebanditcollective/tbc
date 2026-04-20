@@ -69,7 +69,7 @@ const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
         form.reset();
         if (status) status.textContent = 'Thank you. Your inquiry has been sent.';
       } catch (error) {
-        if (status) status.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
+        if (status) status.textContent = 'Something went wrong. Please email banditcollective.nyc@gmail.com.';
       } finally {
         submitter?.removeAttribute('disabled');
       }

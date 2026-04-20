@@ -9,29 +9,22 @@ type TileImage = {
 type Props = {
   href: string;
   title: string;
-  location?: string;
-  year?: number;
   images: TileImage[];
 };
 
-const { href, title, location, year, images } = Astro.props;
-const meta = [location, year].filter(Boolean).join(', ');
+const { href, title, images } = Astro.props;
 ---
 
 <a class="project-tile" href={href}>
   <div class="project-tile__media">
     <CrossfadeStack images={images} interval={4000} />
-  </div>
-  <div class="project-tile__meta">
-    <h2>{title}</h2>
-    {meta && <p>{meta}</p>}
+    <h2 class="project-tile__title">{title}</h2>
   </div>
 </a>
 
 <style>
   .project-tile {
-    display: grid;
-    gap: 1.2rem;
+    display: block;
   }
 
   .project-tile:hover .project-tile__media :global(.crossfade-stack__image.is-active),
@@ -41,24 +34,51 @@ const meta = [location, year].filter(Boolean).join(', ');
 
   .project-tile__media {
     position: relative;
+    width: 85%;
+    margin: 0 auto;
     aspect-ratio: 3 / 2;
     overflow: hidden;
     background: var(--color-surface);
   }
 
-  .project-tile__meta h2 {
-    margin: 0 0 0.4rem;
+  .project-tile__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.42);
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .project-tile:hover .project-tile__media::after,
+  .project-tile:focus-visible .project-tile__media::after {
+    opacity: 1;
+  }
+
+  .project-tile__title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    margin: 0;
+    padding: 0.65rem 1rem;
+    color: #fff;
     font-family: var(--font-heading);
     font-size: clamp(1.9rem, 4vw, 2.5rem);
     font-weight: 700;
     line-height: 1;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
   }
 
-  .project-tile__meta p {
-    margin: 0;
-    color: var(--color-muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-size: 0.9rem;
+  @media (max-width: 720px) {
+    .project-tile__title {
+      width: min(calc(100% - 2rem), 22rem);
+      white-space: normal;
+    }
   }
 </style>

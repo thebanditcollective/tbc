@@ -18,9 +18,11 @@ if (!project) {
   throw new Error(`Project not found for slug: ${slug}`);
 }
 
-const projects = await getProjects();
-const nextProject = projects.find((item) => item.slug === project.data.nextProjectSlug) ?? projects[0];
-const meta = [project.data.location, project.data.year].filter(Boolean).join(' / ');
+const carouselSlides = project.data.storyImages.map((image, index) => ({
+  type: 'story' as const,
+  images: [image],
+  alt: `${project.data.title} story image ${index + 1}`
+}));
 ---
 
 <BaseLayout
@@ -29,12 +31,49 @@ const meta = [project.data.location, project.data.year].filter(Boolean).join(' /
   pathname={`/interiors/${project.slug}`}
 >
   <article class="case-study">
-    <section class="case-study__header shell">
-      <a class="case-study__back" href={withBase('/interiors')}>Back to Interiors</a>
-      <h1>{project.data.title}</h1>
-      {meta && <p class="case-study__meta">{meta}</p>}
-      <p class="case-study__description">{project.data.shortDescription}</p>
+    <section class="case-study__carousel" data-project-carousel>
+      <button class="case-study__arrow case-study__arrow--prev" type="button" aria-label="Scroll to previous project image" data-project-carousel-prev>
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button class="case-study__arrow case-study__arrow--next" type="button" aria-label="Scroll to next project image" data-project-carousel-next>
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M12 8L20 16L12 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <div class="case-study__carousel-track" data-project-carousel-track tabindex="0" aria-label={`${project.data.title} image carousel`}>
+        {carouselSlides.map((slide, index) => (
+          <figure class:list={['case-study__carousel-slide', `case-study__carousel-slide--${slide.type}`, { 'is-active': index === 0 }]} data-project-carousel-slide>
+            {slide.images.map((image, imageIndex) => (
+              <div class="case-study__carousel-frame">
+                <Image
+                  src={image}
+                  alt={slide.images.length > 1 ? `${slide.alt}, image ${imageIndex + 1}` : slide.alt}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  quality={80}
+                  data-project-lightbox-index={index}
+                  data-project-lightbox-trigger
+                />
+              </div>
+            ))}
+          </figure>
+        ))}
+      </div>
     </section>
+
+    <div class="case-study__dots" data-project-carousel-dots>
+      {carouselSlides.map((_, index) => (
+        <button
+          class:list={['case-study__dot', { 'is-active': index === 0 }]}
+          type="button"
+          aria-label={`Go to project image ${index + 1}`}
+          data-project-carousel-dot
+        ></button>
+      ))}
+    </div>
 
     <section class="case-study__story">
       {project.data.storyImages.map((image, index) => (
@@ -67,54 +106,170 @@ const meta = [project.data.location, project.data.year].filter(Boolean).join(' /
     </section>
 
     <footer class="case-study__next shell">
-      <a href={withBase(`/interiors/${nextProject.slug}`)}>
-        <span>Next Project</span>
-        <strong>{nextProject.data.title}</strong>
-      </a>
+      <a href={withBase('/interiors')}>&lt; Back to all Projects</a>
+      <span aria-hidden="true">|</span>
+      <strong>{project.data.title}</strong>
     </footer>
   </article>
+
+  <div class="case-study-lightbox" data-project-lightbox aria-hidden="true">
+    <button class="case-study-lightbox__close" type="button" aria-label="Close image preview" data-project-lightbox-close>
+      &times;
+    </button>
+    <button class="case-study-lightbox__arrow case-study-lightbox__arrow--prev" type="button" aria-label="View previous image" data-project-lightbox-prev>
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M20 8L12 16L20 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+    <div class="case-study-lightbox__frame">
+      <img src="" alt="" data-project-lightbox-image />
+    </div>
+    <button class="case-study-lightbox__arrow case-study-lightbox__arrow--next" type="button" aria-label="View next image" data-project-lightbox-next>
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M12 8L20 16L12 24" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
 </BaseLayout>
+
+<script is:inline>
+  const projectCarousels = document.querySelectorAll('[data-project-carousel]');
+  const projectLightbox = document.querySelector('[data-project-lightbox]');
+  const projectLightboxImage = projectLightbox?.querySelector('[data-project-lightbox-image]');
+  const projectLightboxClose = projectLightbox?.querySelector('[data-project-lightbox-close]');
+  const projectLightboxPrev = projectLightbox?.querySelector('[data-project-lightbox-prev]');
+  const projectLightboxNext = projectLightbox?.querySelector('[data-project-lightbox-next]');
+
+  projectCarousels.forEach((carousel) => {
+    const track = carousel.querySelector('[data-project-carousel-track]');
+    const slides = Array.from(carousel.querySelectorAll('[data-project-carousel-slide]'));
+    const prevButton = carousel.querySelector('[data-project-carousel-prev]');
+    const nextButton = carousel.querySelector('[data-project-carousel-next]');
+    const dotsContainer = carousel.parentElement?.querySelector('[data-project-carousel-dots]');
+    const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-project-carousel-dot]')) : [];
+    const lightboxTriggers = Array.from(carousel.querySelectorAll('[data-project-lightbox-trigger]'));
+    const desktopQuery = window.matchMedia('(min-width: 721px)');
+    let activeIndex = 0;
+    let wheelLocked = false;
+    let lastViewportWidth = window.innerWidth;
+
+    if (!track || !slides.length || !dots.length) return;
+
+    const update = () => {
+      slides.forEach((slide, index) => slide.classList.toggle('is-active', index === activeIndex));
+      dots.forEach((dot, index) => dot.classList.toggle('is-active', index === activeIndex));
+    };
+
+    const setTrackOffset = (animate = true) => {
+      track.style.transition = animate ? '' : 'none';
+      track.style.transform = '';
+    };
+
+    const scrollToSlide = (index, animate = true) => {
+      activeIndex = (index + slides.length) % slides.length;
+      setTrackOffset(animate);
+      update();
+    };
+
+    const scrollBySlide = (direction) => {
+      scrollToSlide(activeIndex + direction);
+    };
+
+    const syncLightbox = () => {
+      if (!projectLightbox || !projectLightboxImage) return;
+      const trigger = lightboxTriggers[activeIndex];
+      if (!trigger) return;
+
+      projectLightboxImage.setAttribute('src', trigger.currentSrc || trigger.getAttribute('src') || '');
+      projectLightboxImage.setAttribute('alt', trigger.getAttribute('alt') || '');
+    };
+
+    const openLightbox = (index) => {
+      if (!projectLightbox || !projectLightboxImage) return;
+      scrollToSlide(index, false);
+      syncLightbox();
+      projectLightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('has-project-lightbox');
+    };
+
+    const closeLightbox = () => {
+      document.body.classList.remove('has-project-lightbox');
+      projectLightbox?.setAttribute('aria-hidden', 'true');
+      if (projectLightboxImage) {
+        projectLightboxImage.removeAttribute('src');
+        projectLightboxImage.removeAttribute('alt');
+      }
+    };
+
+    const moveLightbox = (direction) => {
+      if (!document.body.classList.contains('has-project-lightbox')) return;
+      scrollBySlide(direction);
+      syncLightbox();
+    };
+
+    const handleWheel = (event) => {
+      if (!desktopQuery.matches) return;
+      const isHorizontalGesture = Math.abs(event.deltaX) > Math.abs(event.deltaY) * 1.2;
+      if (!isHorizontalGesture || Math.abs(event.deltaX) < 18) return;
+
+      const isMovingForward = event.deltaX > 0;
+
+      event.preventDefault();
+      if (wheelLocked) return;
+
+      wheelLocked = true;
+      scrollBySlide(isMovingForward ? 1 : -1);
+      window.setTimeout(() => {
+        wheelLocked = false;
+      }, 520);
+    };
+
+    prevButton?.addEventListener('click', () => scrollBySlide(-1));
+    nextButton?.addEventListener('click', () => scrollBySlide(1));
+    dots.forEach((dot, index) => dot.addEventListener('click', () => scrollToSlide(index)));
+    lightboxTriggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        openLightbox(Number(trigger.getAttribute('data-project-lightbox-index')) || 0);
+      });
+    });
+    projectLightboxPrev?.addEventListener('click', () => moveLightbox(-1));
+    projectLightboxNext?.addEventListener('click', () => moveLightbox(1));
+    projectLightboxClose?.addEventListener('click', closeLightbox);
+    projectLightbox?.addEventListener('click', (event) => {
+      if (event.target === projectLightbox) closeLightbox();
+    });
+    window.addEventListener('keydown', (event) => {
+      if (!document.body.classList.contains('has-project-lightbox')) return;
+      if (event.key === 'Escape') {
+        closeLightbox();
+      } else if (event.key === 'ArrowLeft') {
+        moveLightbox(-1);
+      } else if (event.key === 'ArrowRight') {
+        moveLightbox(1);
+      }
+    });
+    carousel.addEventListener('wheel', handleWheel, { passive: false });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === lastViewportWidth) return;
+      lastViewportWidth = window.innerWidth;
+      scrollToSlide(activeIndex, false);
+    });
+
+    update();
+    setTrackOffset(false);
+  });
+</script>
 
 <style>
   .case-study {
-    padding-top: 96px;
+    padding-top: 0;
     padding-bottom: 96px;
+    animation: case-study-page-enter 1.45s var(--ease-luxury) both;
   }
 
-  .case-study__header {
-    display: grid;
-    gap: 0.8rem;
-    padding-top: 4rem;
-    padding-bottom: 5rem;
-  }
-
-  .case-study__back {
-    color: var(--color-accent);
-    font-size: 0.92rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-
-  .case-study__header h1 {
-    margin: 0;
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 6vw, 5.6rem);
-    line-height: 0.95;
-  }
-
-  .case-study__meta {
-    margin: 0;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.92rem;
-  }
-
-  .case-study__description {
-    max-width: 50ch;
-    margin: 0;
-    color: var(--color-muted);
-    line-height: 1.8;
+  .case-study__carousel {
+    display: none;
   }
 
   .case-study__story {
@@ -144,63 +299,330 @@ const meta = [project.data.location, project.data.year].filter(Boolean).join(' /
 
   .case-study__next {
     display: flex;
-    justify-content: flex-end;
-    padding-top: 5rem;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.45rem;
+    padding-top: 0.6rem;
+    font-size: 0.86rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .case-study__next a {
-    display: grid;
-    gap: 0.35rem;
-    text-align: right;
+    color: var(--color-muted);
+    transition: color 220ms ease;
+  }
+
+  .case-study__next a:hover,
+  .case-study__next a:focus-visible {
+    color: var(--color-text);
   }
 
   .case-study__next span {
     color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.86rem;
   }
 
   .case-study__next strong {
-    font-size: 0.86rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  }
+
+  .case-study-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: calc(78px + 1rem) clamp(4rem, 7vw, 6rem) calc(3.6rem + 1rem);
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  .case-study-lightbox[aria-hidden='false'] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .case-study-lightbox__frame {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .case-study-lightbox img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(78vw, 1180px);
+    max-height: calc(100svh - 78px - 3.6rem - 2rem);
+    object-fit: contain;
+  }
+
+  .case-study-lightbox__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.48);
+    cursor: pointer;
+    font-size: 2.25rem;
+    font-weight: 300;
+    line-height: 1;
+    transition: color 180ms ease;
+  }
+
+  .case-study-lightbox__close:hover,
+  .case-study-lightbox__close:focus-visible {
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .case-study-lightbox__arrow {
+    position: fixed;
+    top: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fdfbf7;
+    cursor: pointer;
+    opacity: 0.62;
+    transform: translateY(-50%);
+    transition:
+      opacity 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .case-study-lightbox__arrow--prev {
+    left: clamp(1rem, 4vw, 3rem);
+  }
+
+  .case-study-lightbox__arrow--next {
+    right: clamp(1rem, 4vw, 3rem);
+  }
+
+  .case-study-lightbox__arrow:hover,
+  .case-study-lightbox__arrow:focus-visible {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+
+  :global(body.has-project-lightbox) {
+    overflow: hidden;
+  }
+
+  :global(body.has-project-lightbox) .case-study__arrow {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(body.has-project-lightbox) .case-study__carousel,
+  :global(body.has-project-lightbox) .case-study__dots,
+  :global(body.has-project-lightbox) .case-study__next {
+    visibility: hidden;
   }
 
   @media (min-width: 721px) {
-    .case-study__story-item {
+    .case-study {
+      padding-bottom: 0;
+    }
+
+    .case-study__carousel {
+      --carousel-image-height: min(68svh, calc(100svh - 15.25rem), 700px);
+      position: relative;
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      padding-top: clamp(0.5rem, 1.5vh, 1rem);
+    }
+
+    .case-study__carousel-track {
+      position: relative;
+      display: block;
+      width: 100%;
+      min-height: var(--carousel-image-height);
+      user-select: none;
+      touch-action: pan-y;
+    }
+
+    .case-study__carousel-track:focus,
+    .case-study__carousel-track:focus-visible {
+      outline: none;
+    }
+
+    .case-study__carousel-slide {
+      position: absolute;
+      inset: 0;
       display: grid;
       justify-items: center;
-    }
-
-    .case-study__story-item img,
-    .case-study__diptych img {
-      width: auto;
-      max-width: 100%;
-      max-height: calc(100svh - 120px);
-    }
-
-    .case-study__diptych {
       align-items: center;
+      width: 100%;
+      min-width: 100%;
+      min-height: var(--carousel-image-height);
+      margin: 0;
+      padding: 0 clamp(5rem, 8vw, 7rem);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 720ms ease;
     }
 
-    .case-study__diptych img {
-      justify-self: center;
+    .case-study__carousel-slide.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .case-study__carousel-slide--diptych {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(1.5rem, 4vw, 4rem);
+    }
+
+    .case-study__carousel-frame {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: var(--carousel-image-height);
+      min-width: 0;
+    }
+
+    .case-study__carousel-slide img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: var(--carousel-image-height);
+      object-fit: scale-down;
+      cursor: pointer;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    .case-study__arrow {
+      position: absolute;
+      top: 50%;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.25rem;
+      height: 3.25rem;
+      padding: 0;
+      border: 1px solid rgba(43, 43, 43, 0.08);
+      border-radius: 999px;
+      background: rgba(253, 251, 247, 0.54);
+      backdrop-filter: blur(6px);
+      color: var(--color-text);
+      cursor: pointer;
+      opacity: 0.48;
+      transform: translateY(-50%);
+      transition:
+        opacity 220ms ease,
+        background-color 220ms ease,
+        border-color 220ms ease;
+    }
+
+    .case-study__arrow--prev {
+      left: 1.25rem;
+    }
+
+    .case-study__arrow--next {
+      right: 1.25rem;
+    }
+
+    .case-study__arrow:hover,
+    .case-study__arrow:focus-visible {
+      opacity: 1;
+      background: rgba(253, 251, 247, 0.92);
+      border-color: rgba(43, 43, 43, 0.22);
+    }
+
+    .case-study__arrow.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .case-study__dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.72rem;
+      width: 100%;
+      margin: 1.05rem auto 0;
+      padding: 0;
+    }
+
+    .case-study__dot {
+      display: block;
+      flex: 0 0 auto;
+      width: 0.55rem;
+      height: 0.55rem;
+      min-width: 0.55rem;
+      min-height: 0.55rem;
+      max-width: 0.55rem;
+      max-height: 0.55rem;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(43, 43, 43, 0.24);
+      color: transparent;
+      cursor: pointer;
+      font-size: 0;
+      line-height: 0;
+      overflow: hidden;
+      appearance: none;
+      transition:
+        transform 220ms ease,
+        background-color 220ms ease,
+        opacity 220ms ease;
+    }
+
+    .case-study__dot.is-active {
+      background: rgba(43, 43, 43, 0.74);
+      opacity: 1;
+      transform: scale(1.18);
+    }
+
+    .case-study__story {
+      display: none;
+    }
+
+    .case-study__next {
+      margin-top: 0.65rem;
+      margin-bottom: 0.1rem;
+      padding-top: 0;
     }
   }
 
   @media (max-width: 720px) {
     .case-study {
-      padding-top: 72px;
-    }
-
-    .case-study__header {
-      text-align: center;
+      padding-top: 24px;
     }
 
     .case-study__story {
       gap: 48px;
+    }
+
+    .case-study__dots {
+      display: none;
     }
 
     .case-study__story-item,
@@ -214,11 +636,39 @@ const meta = [project.data.location, project.data.year].filter(Boolean).join(' /
     }
 
     .case-study__next {
-      justify-content: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      padding-top: 2rem;
+    }
+  }
+
+  @media (min-width: 721px) and (max-width: 860px) {
+    .case-study-lightbox {
+      padding-top: calc(74px + 1rem);
     }
 
-    .case-study__next a {
-      text-align: center;
+    .case-study-lightbox img {
+      max-height: calc(100svh - 74px - 3.6rem - 2rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .case-study {
+      animation: none;
+    }
+  }
+
+  @keyframes case-study-page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
     }
   }
 </style>

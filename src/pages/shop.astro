@@ -1,11 +1,118 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PlaceholderPage from '../components/PlaceholderPage.astro';
+import { withBase } from '../lib/paths';
 ---
 
-<BaseLayout title="Shop | Bandit Collective" pathname="/shop">
-  <PlaceholderPage
-    title="A shop for collected pieces is coming into view."
-    body="The shop route is already part of the site shell so the brand can grow naturally into products, vintage finds, or curated edits without redesigning the navigation later."
-  />
+<BaseLayout
+  title="Shop | Bandit Collective"
+  description="A collected edit of antique furniture, vintage finds, and one-of-a-kind pieces for the home is coming soon."
+  pathname="/shop"
+>
+  <section class="shop-coming-soon shell" aria-labelledby="shop-title">
+    <div class="shop-coming-soon__intro">
+      <h1 class="section-title" id="shop-title">The Shop Is Coming Soon</h1>
+      <p class="shop-coming-soon__lede">
+        A collected edit of antique furniture, vintage finds, and one-of-a-kind pieces for the home.
+      </p>
+      <p class="shop-coming-soon__copy">
+        We are gathering pieces slowly and thoughtfully, from markets, dealers, and travels near and far. Each piece will
+        be chosen for its character, craftsmanship, and the quiet history it brings into a home.
+      </p>
+    </div>
+
+    <div class="shop-coming-soon__inquiry">
+      <h2>Looking For Something Specific?</h2>
+      <p>
+        We welcome sourcing inquiries for antique furniture, vintage objects, and characterful pieces for the home.
+      </p>
+      <a href={withBase('/contact')}>Start a sourcing inquiry</a>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  :global(.site-main--offset) {
+    display: flex;
+    align-items: center;
+  }
+
+  .shop-coming-soon {
+    display: grid;
+    gap: clamp(1.25rem, 3vh, 2rem);
+    justify-items: center;
+    max-width: 46rem;
+    padding: clamp(1rem, 3vh, 2rem) 0;
+    text-align: center;
+  }
+
+  .shop-coming-soon__intro {
+    max-width: 42rem;
+  }
+
+  .shop-coming-soon :is(h1, h2, p, a),
+  .shop-coming-soon__lede {
+    font-size: 1rem;
+  }
+
+  .shop-coming-soon .section-title,
+  .shop-coming-soon__inquiry h2 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .shop-coming-soon__lede {
+    max-width: 36rem;
+    margin: 1rem auto 0;
+    color: var(--color-text);
+    font-weight: 700;
+    line-height: 1.55;
+  }
+
+  .shop-coming-soon__copy,
+  .shop-coming-soon__inquiry p {
+    max-width: 38rem;
+    margin: 0.85rem auto 0;
+    color: var(--color-muted);
+    line-height: 1.55;
+  }
+
+  .shop-coming-soon__inquiry {
+    max-width: 38rem;
+    padding-top: clamp(1.15rem, 2.4vh, 1.75rem);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .shop-coming-soon__inquiry h2 {
+    margin: 0;
+  }
+
+  .shop-coming-soon__inquiry a {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.85rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--color-accent);
+    color: var(--color-text);
+    line-height: 1.35;
+    transition: color 220ms ease;
+  }
+
+  .shop-coming-soon__inquiry a:hover,
+  .shop-coming-soon__inquiry a:focus-visible {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 560px) {
+    .shop-coming-soon {
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+
+    .shop-coming-soon__copy,
+    .shop-coming-soon__inquiry p {
+      line-height: 1.45;
+    }
+  }
+</style>

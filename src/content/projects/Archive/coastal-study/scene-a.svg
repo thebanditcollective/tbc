@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
-  <rect width="1600" height="1000" fill="#d7dcda" />
-  <rect x="170" y="160" width="1240" height="520" rx="34" fill="#f6faf6" />
-  <rect x="990" y="270" width="230" height="250" rx="24" fill="#8da2a3" opacity="0.42" />
-  <text x="180" y="900" fill="#4f676c" font-family="Georgia, serif" font-size="92">Coastal Study</text>
-</svg>

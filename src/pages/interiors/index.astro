@@ -18,8 +18,6 @@ const projects = await getProjects();
         <ProjectTile
           href={withBase(`/interiors/${project.slug}`)}
           title={project.data.title}
-          location={project.data.location}
-          year={project.data.year}
           images={project.data.coverImages.map((image) => ({
             src: image.src,
             alt: `${project.data.title} cover image`
@@ -31,9 +29,17 @@ const projects = await getProjects();
 </BaseLayout>
 
 <style>
+  :global(.site-main--offset) {
+    display: flex;
+  }
+
   .interiors {
-    padding-top: 96px;
-    padding-bottom: 120px;
+    flex: 1;
+    display: grid;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    animation: interiors-page-enter 1.35s var(--ease-luxury) both;
   }
 
   .interiors__grid {
@@ -52,8 +58,28 @@ const projects = await getProjects();
 
   @media (max-width: 720px) {
     .interiors {
-      padding-top: 72px;
-      padding-bottom: 88px;
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .interiors {
+      animation: none;
+    }
+  }
+
+  @keyframes interiors-page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
     }
   }
 </style>

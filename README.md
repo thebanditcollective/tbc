@@ -58,7 +58,7 @@ Homepage:
 - `src/pages/index.astro`
 - `src/components/HomeStatement.astro`
 - `src/components/HomeLookbook.astro`
-- `src/components/HomeSpectrumFeature.astro`
+- `src/components/HomeApproach.astro`
 - `src/components/HomeContact.astro`
 - `src/components/HomePressStrip.astro`
 
@@ -83,6 +83,12 @@ Other pages:
 - `src/pages/contact.astro`
 - `src/components/PlaceholderPage.astro`
 
+Contact-specific implementation:
+
+- `src/pages/contact.astro`
+- `src/components/HomeContact.astro`
+- `src/layouts/BaseLayout.astro` page-background props and header/footer overlay styles
+
 Wix reference exports:
 
 - `wix-reference/wix_reference-home-statement.html.txt`
@@ -96,13 +102,17 @@ Image assets:
 - Optimized homepage source images: `src/assets/images/home/`
   - Hero: `src/assets/images/home/hero/`
   - Lookbook carousel: `src/assets/images/home/lookbook/`
-  - Spectrum feature: `src/assets/images/home/spectrum/`
-- Legacy/reference homepage public images still exist in `public/images/home/`, but active homepage hero/lookbook/spectrum imagery now imports from `src/assets` and is processed by Astro.
+  - Spectrum feature assets may still exist, but `HomeSpectrumFeature` is no longer rendered on the homepage.
+- Legacy/reference homepage public images still exist in `public/images/home/`, but active homepage hero/lookbook imagery now imports from `src/assets` and is processed by Astro.
 - Press logos: `public/images/press/`
+- Project images: `src/content/projects/<Project Name>/`
+  - Covers: `cover/`
+  - Desktop carousel/source story images: `story/`
+  - Optional mobile/detail-page diptych imagery: `diptychs/`
 
 ## Image Handling
 
-- Homepage hero, lookbook, and spectrum images are imported from `src/assets/images/home/` and rendered with Astro's `Image` component.
+- Homepage hero and lookbook images are imported from `src/assets/images/home/` and rendered with Astro's `Image` component.
 - Astro converts those source images to optimized WebP files at build time.
 - `public/images/home/optimized/` contains earlier manually compressed WebP files, but the active homepage now uses the Astro asset pipeline instead.
 - Assets that must be served directly, such as press logos, remain in `public/images/`.
@@ -111,14 +121,21 @@ Image assets:
 
 The homepage currently renders:
 
-1. Full-screen hero image with a small animated down arrow.
+1. Full-screen hero image.
 2. `HomeStatement` section adapted from the Wix statement reference.
 3. `HomeLookbook` carousel adapted from the Wix lookbook reference.
-4. `HomeSpectrumFeature` full-screen image/text feature adapted from the Wix spectrum reference.
-5. `HomeContact` contact form adapted from the Wix contact reference.
+4. `HomeApproach` process/approach text section.
+5. `HomeContact` contact form adapted from the Wix contact reference, with the title hidden on the homepage.
 6. `HomePressStrip` press logo strip adapted from the Wix press reference.
 
 The homepage imports and renders these components in `src/pages/index.astro`.
+
+Recent homepage spacing notes:
+
+- `src/pages/index.astro` uses the `.home-flow` grid for homepage section spacing.
+- The lower homepage has been tightened so the gaps between the lookbook CTA, `HomeApproach`, `HomeContact`, and `HomePressStrip` are smaller than the default section rhythm.
+- The page-flow bottom padding is removed so the footer begins immediately after the press strip.
+- Be careful changing `.home-flow :global(...)` negative margins because those currently control the reduced gaps around the approach/contact/press area.
 
 ## Header Behavior
 
@@ -130,11 +147,13 @@ Current intended behavior:
 - Header is fixed.
 - Home page starts transparent over the hero.
 - Other pages start with the existing filled header color.
+- Pages that pass `pageBackgroundColor` or `pageBackgroundImage` to `BaseLayout` use the page-background variant: the header is transparent over the page background, with white header/nav/toggle text.
 - On scroll, the header smoothly transitions to `rgba(0, 0, 0, 0.3)`.
 - Header text/nav/toggle stay white in the scrolled state.
 - Header background transition is driven by a `--header-scroll-progress` CSS variable updated in inline JS.
-- Mobile nav includes Home, Interiors, Services, and Contact.
-- Mobile nav active state is URL-based; Home is active only on `/`, while non-root links can match nested paths.
+- Primary nav links currently include Interiors, Services, Shop, and Contact. The brand link returns home.
+- Mobile nav links currently include Interiors, Services, and Contact.
+- Mobile nav active state is URL-based; non-root links can match nested paths.
 - Mobile hamburger animates smoothly into an X when opened and back to lines when closed.
 - Mobile dropdown fades/slides open and uses a 75% black background.
 
@@ -187,6 +206,8 @@ Current intended behavior:
 - The final card says `See the complete story`.
 - The final card itself is not a link; only the arrow inside the final card links to `/interiors`.
 - The CTA under the carousel says `Step inside the full collection`.
+- Clicking a carousel image opens the existing lightbox/expanded image view.
+- The lightbox image is intentionally positioned slightly lower by padding the overlay as `calc(5vh + 51px) 5vw 5vh`, so the expanded image is centered within the visible area below the fixed scrolled header.
 - On mobile, the carousel uses native horizontal scroll with CSS scroll-snap and `-webkit-overflow-scrolling: touch`.
 - Mobile dots sync from the native `scrollLeft` position.
 - Mobile carousel images use natural height (`height: auto`) to avoid viewport-height resizing/jumps when browser UI appears or disappears.
@@ -215,17 +236,21 @@ If continuing work here, test these cases manually in the browser:
 - On mobile, horizontal swiping should move the native scroll carousel smoothly, while vertical swiping should scroll the page normally.
 - On mobile, the carousel should not jump or resize while scrolling.
 
-### HomeSpectrumFeature
+### HomeApproach
 
-File: `src/components/HomeSpectrumFeature.astro`
+File: `src/components/HomeApproach.astro`
 
 Current intended behavior:
 
-- Full-screen feature section.
-- Uses `src/assets/images/home/spectrum/spectrum-feature.jpg` through Astro image optimization.
-- Image fills available screen area.
-- Text band reads: `From the first color` -> arrow -> `to the final detail`.
-- The section no longer uses negative `100vw` full-bleed positioning because that was causing horizontal drift.
+- Simple, text-only approach/process section between `HomeLookbook` and `HomeContact`.
+- Title: `From First Thought to Final Layer`.
+- Three horizontal text blocks on desktop:
+  - `01 Listen` with copy: `We design the space around how you want to use it.`
+  - `02 Shape` with copy: `From palette and materials to furniture and furnishings. We build you a mood board and help source it all.`
+  - `03 Layer` with copy: `The final details that bring your story to life. Textiles, lighting, styling, and maybe some wallpaper?`
+- CTA line below: `Have a space in mind? Tell us where the story begins.`
+- Earlier versions explored image placeholders, abstract connectors, and a sketched measuring tape. Those were removed; keep the current version simple unless the user asks to revisit them.
+- Desktop keeps the three blocks horizontal. Tablet/mobile currently stacks the blocks.
 
 ### HomeContact
 
@@ -234,11 +259,30 @@ File: `src/components/HomeContact.astro`
 Current intended behavior:
 
 - Centered, minimal contact form.
-- Headline: `Start your story`
+- Headline: `Start your story` is available by default, but hidden when `showTitle={false}` or when `standalone` is true.
+- Props currently include `showEmail`, `standalone`, and `showTitle`.
 - Fields: name, email, phone optional, message.
 - Submit label: `Send it our way`
+- If `showEmail` is true, the form shows `Or email us directly:` with `banditcollective.nyc@gmail.com` below the submit/status area.
 - Uses `PUBLIC_FORMSPREE_ENDPOINT` if configured.
 - If endpoint is missing, the form stays visually ready and shows a status message asking for the endpoint.
+- Home page spacing around this section has been reduced; standalone contact page behavior should remain separate.
+- The standalone variant is used by `/contact`. It keeps the page compact enough to fit in one viewport with the header and footer, uses transparent section background, narrows the form, and applies a translucent blurred overlay directly to the form element.
+
+### Contact Page
+
+File: `src/pages/contact.astro`
+
+Current intended behavior:
+
+- `/contact` is a standalone page, not a modal or placeholder.
+- It renders `<HomeContact showEmail standalone />`.
+- The page passes `pageBackgroundColor="#A69401"` to `BaseLayout`, so the solid background color sits behind the fixed header, the contact form area, and the footer.
+- The contact page should remain a no-scroll, single-viewport composition on normal desktop viewports.
+- The form floats over the solid background as a translucent readable overlay. Avoid reintroducing a full-width solid section or a separate panel that colors the left/right sides of the page.
+- The page does not render the `Start your story` heading.
+- Earlier iterations tried a contact background image and a tassel decoration; both were removed. The image file may still exist in `src/assets/images/contact/contact-background.jpg`, but it is not currently imported by `/contact`.
+- Header/footer white overlay styling for this page comes from `BaseLayout`'s page-background variant.
 
 ### HomePressStrip
 
@@ -246,13 +290,14 @@ File: `src/components/HomePressStrip.astro`
 
 Current intended behavior:
 
-- Label: `As seen in`
+- Label: `Featured in`
 - Uses local logo assets from `public/images/press/`
 - Logos currently referenced:
   - `Veranda-logo.png`
   - `adpro_logo.png`
-  - `CG_Logo_BLACK-site.jpg`
+  - `cottages-gardens-logo (1).webp`
 - Logos are grayscale/low-opacity by default and brighten on hover.
+- The homepage footer should start immediately after this strip; avoid reintroducing bottom page-flow padding below it unless requested.
 
 ### Footer
 
@@ -260,9 +305,10 @@ File: `src/layouts/BaseLayout.astro`
 
 Current intended behavior:
 
-- Footer content is centered in the same page container alignment as the `As seen in` press strip.
-- Content is: Instagram icon/link, `Follow us on Instagram`, divider, and `(c) 2025 Bandit Collective. All Rights Reserved.`
-- On mobile, footer content can wrap to two lines while staying centered.
+- Footer content uses the shared `.shell` width and is left-aligned.
+- Content is: `New York, NY`, email link, Instagram icon/link, and `© TBC 2026`, separated by dividers on wider screens.
+- On mobile, dividers hide and content wraps within a narrow left-aligned footer.
+- Pages using the `BaseLayout` page-background variant, including `/contact`, render footer text/links in warm white over the page background.
 
 ## Base Path Rules
 
@@ -306,13 +352,70 @@ Schema fields currently in use:
 
 Astro reserves `slug`, so routes use `entry.slug` instead of a custom `data.slug`.
 
-Starter/demo projects currently exist for:
+Current real project content exists for:
 
-- `brooklyn-loft`
-- `cotswold-house`
-- `coastal-study`
+- `Brooklyn Brownstone`
+- `New York Apartment`
 
-These should eventually be replaced with real project content and photography.
+Ignore any `Archive` folder under `src/content/projects/`; it is not intended to render as active project content.
+
+Older starter/demo projects may still exist in the repo history or stale notes, but active Interiors work should be based on the real project folders above.
+
+## Interiors And Project Pages Handoff
+
+Current Interiors listing:
+
+- Route: `src/pages/interiors/index.astro`
+- Project tiles use `src/components/ProjectTile.astro`.
+- Project names are overlaid in uppercase white text centered over each image.
+- Desktop hover keeps the existing zoom animation and adds a translucent overlay across the full image.
+- Text below the project tiles has been removed.
+- The Interiors page is vertically centered between the fixed header and footer.
+- Site-wide layout was adjusted so `.site-body` is flex column, `.site-main` flexes, and the old global `main { min-height: 100vh; }` behavior was removed to prevent excess footer whitespace.
+
+Current project detail page:
+
+- Route: `src/pages/interiors/[slug]/index.astro`
+- Desktop project page uses a single carousel at the top of the page.
+- Mobile still renders the stacked story/diptych page content.
+- All text above the images was removed: no back link, project name, description, or location appears above the carousel.
+- Desktop carousel uses only `project.data.storyImages`; diptychs are not included in the desktop carousel.
+- Diptychs can still exist in content and remain available for the mobile/detail story flow.
+- Carousel images must never crop or change aspect ratio. The current CSS uses image frames plus `width: auto`, `height: auto`, `max-width`, `max-height`, and `object-fit: scale-down/contain`.
+- Desktop carousel uses stacked absolute slides with a soft opacity crossfade instead of horizontal track movement.
+- Carousel loops infinitely: right arrow on the last story image returns to the first; left arrow on the first returns to the last.
+- Dots stay synced with the active slide for arrow clicks, dot clicks, wheel/trackpad navigation, and lightbox navigation.
+- The desktop project page is tuned to fit header, carousel, dots, project footer line, and site footer within one viewport on normal desktop sizes.
+- The line below the dots reads `< Back to all Projects | {Project Name}`.
+- `Back to all Projects` links to `/interiors`; the project name is plain text.
+- The old `Next Project` footer link/text was removed.
+
+Project lightbox:
+
+- Implemented directly in `src/pages/interiors/[slug]/index.astro`.
+- Clicking a desktop carousel image opens the lightbox.
+- Lightbox uses the same story-image set and opens at the clicked image index.
+- Lightbox navigation wraps infinitely and calls the same carousel index update, so underlying carousel dots remain synced.
+- Lightbox supports:
+  - Left/right lightbox arrows.
+  - Keyboard `ArrowLeft` and `ArrowRight`.
+  - `Escape` to close.
+  - Clicking outside the image to close.
+- Body scroll is locked with `body.has-project-lightbox` while open.
+- The lightbox element is intentionally rendered outside the animated `.case-study` article. Do not move it back inside the article: `.case-study` has a transform-based entrance animation, and a transformed ancestor can break `position: fixed` behavior.
+- The overlay follows the `HomeLookbook` style: full-screen translucent dark backdrop above header/footer.
+- The lightbox image itself is padded so it visually stays between the header and footer and does not overlap them.
+- Original project carousel content, dots, back/project line, and original carousel arrows are hidden while the lightbox is open, preventing a second image/second arrows from showing behind the overlay.
+- The carousel track focus outline is suppressed to avoid full-width black lines appearing during keyboard interaction.
+
+Be careful when editing project pages:
+
+- Do not reintroduce `object-fit: cover` on project carousel or lightbox images.
+- Do not use fixed `width: 100%; height: 100%` directly on project carousel images unless contained by a frame and verified not to crop.
+- Do not switch the desktop project carousel back to transform-based horizontal movement unless the user explicitly asks; the soft crossfade was chosen because the slide-out animation felt distracting.
+- Do not desync lightbox navigation from carousel navigation/dots.
+- If changing lightbox positioning, remember the user wants the overlay backdrop over the whole page while the displayed image remains visually between header and footer.
+
 
 ## Current Routes
 
@@ -331,6 +434,20 @@ Expected variables:
 
 - `PUBLIC_FORMSPREE_ENDPOINT=https://formspree.io/f/your-form-id`
 - `SITE_URL=https://your-domain.com`
+
+## Layout Variants
+
+`BaseLayout` supports optional page-level background props:
+
+- `pageBackgroundColor`: sets a solid background color behind the header, main content, and footer.
+- `pageBackgroundImage`: renders a fixed image layer behind the header, main content, and footer.
+- `pageBackgroundOverlay`: opacity for the dark overlay over `pageBackgroundImage`.
+- `pageBackgroundPosition`: object-position for `pageBackgroundImage`.
+
+Current usage:
+
+- `/contact` uses `pageBackgroundColor="#A69401"` and does not use `pageBackgroundImage`.
+- When either background prop is present, `BaseLayout` applies the `has-page-background` variant so header/footer text becomes light and overlays the page background.
 
 ## Git And Safety Notes For Future Agents
 
@@ -353,7 +470,7 @@ Status: passes.
 
 ## Current Follow-Up Context
 
-The active refinement thread is focused on the homepage, especially the lookbook carousel desktop behavior. The user is comparing against screenshots and wants section-by-section visual matching.
+The active refinement thread is focused on the homepage, especially section spacing, homepage simplicity, and visual polish around the lookbook carousel and contact area. The user is comparing against the local browser preview and wants section-by-section tuning.
 
 Most recent completed requests:
 
@@ -364,5 +481,24 @@ Most recent completed requests:
 - Carousel changed from native overflow-scroll to controlled transform navigation.
 - Vertical scroll no longer moves carousel images; only horizontal trackpad gestures do.
 - Final carousel card hyperlink removed except for the arrow icon.
+- `HomeSpectrumFeature` was removed from the homepage render.
+- New `HomeApproach.astro` was created and iterated through several concepts. The current kept version is simple text only: title, three short process blocks, and CTA line.
+- The homepage now renders `HomeApproach` between `HomeLookbook` and `HomeContact`.
+- Homepage contact title is hidden by passing `showTitle={false}` to `HomeContact`.
+- Homepage spacing around the lookbook CTA, approach section, contact form, press strip, and footer has been tightened through `index.astro`, `HomeApproach.astro`, and `HomeContact.astro`.
+- Extra bottom page-flow padding after `HomePressStrip` was removed so the footer begins directly after the press strip.
+- `HomeLookbook` lightbox/expanded image behavior was preserved, but the overlay padding was adjusted so the expanded image sits lower and is balanced between the bottom of the fixed header and bottom of the viewport.
+- Contact navigation now routes to the standalone `/contact` page instead of opening a site-wide popup.
+- The global contact modal in `BaseLayout` was removed.
+- The Services page contact CTA was converted away from the old modal flow during this thread. Check the current `src/pages/services.astro` before making further service-page assumptions because there are additional uncommitted service-page edits.
+- `/contact` now uses a solid page background color `#A69401` through `BaseLayout`'s page-background variant.
+- `/contact` uses `HomeContact` in standalone mode with no heading, visible direct email, a translucent blurred form overlay, and slightly increased spacing between form fields/actions.
+- The canonical contact email used in form fallback/status text is `banditcollective.nyc@gmail.com`.
 
-If the next session starts here, the highest-value next step is likely to run the site locally, visually inspect the `HomeLookbook` section on desktop, and tune the final-card clamp/right-arrow/dot behavior based on what is visible in the browser.
+Important git/worktree context:
+
+- This worktree has many uncommitted changes beyond the most recent homepage edits. The user has been advised that if they review the local site and like the current version, the next step is to commit the current state rather than revert it.
+- Do not run broad cleanup commands or reset the worktree unless the user explicitly asks and confirms what should be discarded.
+- If asked to organize Git changes, first show the current `git status --short`, then group changes into logical buckets before staging.
+
+If the next session starts here, the highest-value next step is likely to run the site locally, visually inspect the homepage from `HomeLookbook` through footer, and tune remaining spacing/visual details based on what is visible in the browser.

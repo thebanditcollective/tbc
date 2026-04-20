@@ -4,8 +4,6 @@ location: "Brooklyn, NY"
 shortDescription: "A layered brownstone interior shaped by warm textures, collected details, and quietly expressive rooms."
 coverImages:
   - ./cover/01.jpg
-  - ./cover/02.jpg
-  - ./cover/03.jpg
 storyImages:
   - ./story/01.jpg
   - ./story/02.jpg

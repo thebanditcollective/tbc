@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PlaceholderPage from '../components/PlaceholderPage.astro';
+import HomeContact from '../components/HomeContact.astro';
 ---
 
-<BaseLayout title="Contact | Bandit Collective" pathname="/contact">
-  <PlaceholderPage
-    title="The easiest way to begin is with an inquiry."
-    body="For the first launch, the full inquiry experience lives on the homepage contact section. This page gives the nav a finished shape now and can later become a richer studio contact page with location, FAQ, and process notes."
-  />
+<BaseLayout
+  title="Contact | Bandit Collective"
+  description="Start a conversation with The Bandit Collective about interiors, styling, and home projects."
+  pathname="/contact"
+  pageBackgroundColor="#A69401"
+>
+  <HomeContact showEmail standalone />
 </BaseLayout>

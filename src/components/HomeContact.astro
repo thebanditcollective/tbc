@@ -1,10 +1,21 @@
 ---
+type Props = {
+  showEmail?: boolean;
+  standalone?: boolean;
+  showTitle?: boolean;
+};
+
+const { showEmail = false, standalone = false, showTitle = true } = Astro.props;
 const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
+const contactEmail = 'banditcollective.nyc@gmail.com';
 ---
 
-<section class="home-contact" id="contact">
+<section
+  class:list={['home-contact', { 'home-contact--standalone': standalone }]}
+  id="contact"
+>
   <div class="home-contact__inner">
-    <h2 class="home-contact__title">Start your story</h2>
+    {!standalone && showTitle && <h2 class="home-contact__title">Start your story</h2>}
 
     <form class="home-contact__form" data-home-contact-form data-endpoint={endpoint}>
       <div class="home-contact__field">
@@ -35,6 +46,11 @@ const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
             ? ''
             : 'Add PUBLIC_FORMSPREE_ENDPOINT to activate this form.'}
         </p>
+        {showEmail && (
+          <p class="home-contact__email">
+            Or email us directly: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+          </p>
+        )}
       </div>
     </form>
   </div>
@@ -70,7 +86,7 @@ const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
         form.reset();
         if (status) status.textContent = "Sent. We'll be in touch!";
       } catch (error) {
-        if (status) status.textContent = 'Something went wrong. Please email hello@thebanditcollective.com.';
+        if (status) status.textContent = 'Something went wrong. Please email banditcollective.nyc@gmail.com.';
       } finally {
         submitter?.removeAttribute('disabled');
       }
@@ -80,13 +96,29 @@ const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
 
 <style>
   .home-contact {
+    position: relative;
     background: var(--color-bg);
-    padding: clamp(5rem, 8vw, 6.25rem) 0 clamp(5rem, 9vw, 6.25rem);
+    padding: clamp(2.5rem, 4vw, 3.125rem) 0 clamp(2.5rem, 4.5vw, 3.125rem);
+    overflow: clip;
   }
 
   .home-contact__inner {
+    position: relative;
+    z-index: 1;
     width: min(calc(100% - (var(--page-pad) * 2)), 40rem);
     margin: 0 auto;
+  }
+
+  .home-contact--standalone {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    min-height: calc(100svh - 78px - 5.6rem);
+    padding: clamp(0.75rem, 2vh, 1.25rem) 0 0;
+  }
+
+  .home-contact--standalone .home-contact__inner {
+    width: min(calc(100% - (var(--page-pad) * 2)), 34rem);
   }
 
   .home-contact__title {
@@ -99,8 +131,53 @@ const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
     letter-spacing: -0.01em;
   }
 
+  .home-contact__email {
+    margin: 0;
+    color: rgba(43, 43, 43, 0.68);
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .home-contact__email a {
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-accent);
+    transition: color 220ms ease;
+  }
+
+  .home-contact__email a:hover,
+  .home-contact__email a:focus-visible {
+    color: var(--color-accent);
+  }
+
   .home-contact__form {
     display: block;
+  }
+
+  .home-contact--standalone .home-contact__form {
+    padding: clamp(1.35rem, 3vh, 2rem) clamp(1.25rem, 3.4vw, 2.15rem);
+    border: 1px solid rgba(253, 251, 247, 0.36);
+    border-radius: 8px;
+    background: rgba(253, 251, 247, 0.62);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(14px);
+  }
+
+  .home-contact--standalone .home-contact__title {
+    margin-bottom: clamp(1.15rem, 2.6vh, 1.75rem);
+  }
+
+  .home-contact--standalone .home-contact__field {
+    margin-bottom: clamp(1rem, 2.35vh, 1.4rem);
+  }
+
+  .home-contact--standalone .home-contact__field textarea {
+    min-height: 4.75rem;
+  }
+
+  .home-contact--standalone .home-contact__actions {
+    gap: 0.75rem;
+    margin-top: 0.35rem;
   }
 
   .home-contact__field {

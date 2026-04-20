@@ -1,0 +1,126 @@
+---
+const steps = [
+  {
+    number: '01',
+    title: 'Listen',
+    copy: 'We design the space around how you want to use it.'
+  },
+  {
+    number: '02',
+    title: 'Shape',
+    copy: 'From palette and materials to furniture and furnishings. We build you a mood board and help source it all.'
+  },
+  {
+    number: '03',
+    title: 'Layer',
+    copy: 'The final details that bring your story to life. Textiles, lighting, styling, and maybe some wallpaper?'
+  }
+];
+---
+
+<section class="home-approach">
+  <div class="home-approach__inner">
+    <h2 class="home-approach__title">From First Thought to Final Layer</h2>
+
+    <div class="home-approach__steps">
+      {steps.map((step) => (
+        <article class="home-approach__step">
+          <h3>
+            <span>{step.number}</span>
+            {step.title}
+          </h3>
+          <p>{step.copy}</p>
+        </article>
+      ))}
+    </div>
+
+    <p class="home-approach__cta">Have a space in mind? Tell us where the story begins.</p>
+  </div>
+</section>
+
+<style>
+  .home-approach {
+    background: var(--color-bg);
+    color: var(--color-text);
+    overflow: clip;
+    padding: clamp(1.55rem, 2.5vw, 2.25rem) 0 clamp(1.75rem, 2.7vw, 2.5rem);
+  }
+
+  .home-approach__inner {
+    width: min(calc(100% - (var(--page-pad) * 2)), 76rem);
+    margin: 0 auto;
+  }
+
+  .home-approach__title {
+    margin: 0 0 clamp(2.7rem, 4vw, 3.8rem);
+    font-family: var(--font-heading);
+    font-size: clamp(1.9rem, 2.4vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .home-approach__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(2.5rem, 7.5vw, 8.2rem);
+    padding: 0 clamp(0.7rem, 2vw, 1.35rem);
+  }
+
+  .home-approach__step {
+    max-width: 16rem;
+  }
+
+  .home-approach__step h3 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin: 0 0 0.55rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 1.65vw, 1.58rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .home-approach__step h3 span {
+    color: var(--color-accent);
+    font-size: 0.78em;
+    font-style: italic;
+  }
+
+  .home-approach__step p {
+    margin: 0;
+    color: rgba(43, 43, 43, 0.72);
+    font-size: clamp(0.78rem, 0.9vw, 0.88rem);
+    line-height: 1.68;
+  }
+
+  .home-approach__cta {
+    margin: clamp(4.2rem, 6vw, 5.6rem) 0 0;
+    color: var(--color-text);
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+    font-style: italic;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 860px) {
+    .home-approach__title {
+      white-space: normal;
+    }
+
+    .home-approach__steps {
+      grid-template-columns: 1fr;
+      gap: 1.6rem;
+      padding: 0;
+    }
+
+    .home-approach__step {
+      max-width: 28rem;
+    }
+  }
+</style>

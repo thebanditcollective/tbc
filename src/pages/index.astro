@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeApproach from '../components/HomeApproach.astro';
 import HomeContact from '../components/HomeContact.astro';
 import HomeLookbook from '../components/HomeLookbook.astro';
 import HomePressStrip from '../components/HomePressStrip.astro';
-import HomeSpectrumFeature from '../components/HomeSpectrumFeature.astro';
 import HomeStatement from '../components/HomeStatement.astro';
 import { Image } from 'astro:assets';
 import heroDesktop01 from '../assets/images/home/hero/hero-desktop-01.jpg';
@@ -66,20 +66,13 @@ const mobileHeroImages = [
         />
       ))}
     </div>
-    <div class="bc-hero-arrow">
-      <a href="#statement" aria-label="Scroll to statement">
-        <svg width="20" height="32" viewBox="0 0 20 32" fill="none">
-          <path d="M10 6L10 26M10 26L4 20M10 26L16 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-        </svg>
-      </a>
-    </div>
   </section>
 
   <div class="home-flow">
     <HomeStatement />
     <HomeLookbook />
-    <HomeSpectrumFeature />
-    <HomeContact />
+    <HomeApproach />
+    <HomeContact showTitle={false} />
     <HomePressStrip />
   </div>
 </BaseLayout>
@@ -173,48 +166,19 @@ const mobileHeroImages = [
     }
   }
 
-  .bc-hero-arrow {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-
-  .bc-hero-arrow a {
-    position: absolute;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fdfbf7;
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-    pointer-events: auto;
-  }
-
-  .bc-hero-arrow a:hover {
-    opacity: 1;
-  }
-
-  .bc-hero-arrow svg {
-    animation: bcBounce 2.5s ease-in-out infinite;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-  }
-
-  @keyframes bcBounce {
-    0%, 100% {
-      transform: translateY(0);
-      opacity: 0.75;
-    }
-
-    50% {
-      transform: translateY(8px);
-      opacity: 1;
-    }
-  }
-
   .home-flow {
     display: grid;
-    gap: var(--section-gap);
-    padding: clamp(4rem, 8vw, 7rem) 0 clamp(5rem, 9vw, 8rem);
+    gap: clamp(2.8rem, 5.6vw, 4.9rem);
+    padding: clamp(2.8rem, 5.6vw, 4.9rem) 0 0;
+  }
+
+  .home-flow :global(.home-lookbook),
+  .home-flow :global(.home-contact) {
+    margin-bottom: calc(clamp(2.8rem, 5.6vw, 4.9rem) / -2);
+  }
+
+  .home-flow :global(.home-approach) {
+    margin-bottom: calc(clamp(2.8rem, 5.6vw, 4.9rem) / -1.333);
   }
 
   @media (max-width: 720px) {
@@ -244,8 +208,17 @@ const mobileHeroImages = [
     }
 
     .home-flow {
-      gap: 2.5rem;
-      padding: 1.5rem 0 4rem;
+      gap: 1.75rem;
+      padding: 1.05rem 0 0;
+    }
+
+    .home-flow :global(.home-lookbook),
+    .home-flow :global(.home-contact) {
+      margin-bottom: -0.875rem;
+    }
+
+    .home-flow :global(.home-approach) {
+      margin-bottom: -1.3125rem;
     }
   }
 </style>
