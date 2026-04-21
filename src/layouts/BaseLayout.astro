@@ -211,7 +211,8 @@ const instagramUrl = 'https://www.instagram.com/thebandit.collective';
     border-bottom: 1px solid rgba(43, 43, 43, 0.06);
   }
 
-  .site-header.is-home {
+  .site-header.is-home,
+  .site-header:not(.is-scrolled):not(.is-menu-open) {
     --header-base-red: 0;
     --header-base-green: 0;
     --header-base-blue: 0;
@@ -568,11 +569,20 @@ const instagramUrl = 'https://www.instagram.com/thebandit.collective';
 
   @media (max-width: 560px) {
     .site-footer__inner {
-      max-width: 22rem;
+      flex-wrap: nowrap;
+      max-width: none;
+      gap: 0.35rem;
+      font-size: 0.58rem;
+      white-space: nowrap;
     }
 
     .site-footer__divider {
       display: none;
+    }
+
+    .site-footer__inner > * {
+      flex: 0 0 auto;
+      white-space: nowrap;
     }
 
     .site-footer__instagram,
@@ -587,14 +597,6 @@ const instagramUrl = 'https://www.instagram.com/thebandit.collective';
   }
 
   @media (min-width: 861px) {
-    .site-header {
-      --header-base-red: 0;
-      --header-base-green: 0;
-      --header-base-blue: 0;
-      --header-base-alpha: 0;
-      border-bottom-color: transparent;
-    }
-
     .site-header__brand {
       font-size: clamp(1.41rem, 1.76vw, 1.76rem);
     }

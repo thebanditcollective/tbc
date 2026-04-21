@@ -636,9 +636,14 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
     }
 
     .case-study__next {
-      justify-content: flex-start;
-      flex-wrap: wrap;
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 0.35rem;
       padding-top: 2rem;
+    }
+
+    .case-study__next span {
+      display: none;
     }
   }
 
