@@ -16,7 +16,6 @@ storyImages:
   - ./story/09.jpg
   - ./story/10.jpg
   - ./story/11.jpg
-  - ./story/12.jpg
 nextProjectSlug: "brooklyn-brownstone"
 sortOrder: 2
 featured: true

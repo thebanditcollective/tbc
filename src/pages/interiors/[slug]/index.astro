@@ -64,14 +64,21 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
       </div>
     </section>
 
-    <div class="case-study__dots" data-project-carousel-dots>
-      {carouselSlides.map((_, index) => (
+    <div class="case-study__thumbnails" data-project-carousel-thumbnails>
+      {carouselSlides.map((slide, index) => (
         <button
-          class:list={['case-study__dot', { 'is-active': index === 0 }]}
+          class:list={['case-study__thumbnail', { 'is-active': index === 0 }]}
           type="button"
           aria-label={`Go to project image ${index + 1}`}
-          data-project-carousel-dot
-        ></button>
+          data-project-carousel-thumbnail
+        >
+          <Image
+            src={slide.images[0]}
+            alt={slide.alt}
+            loading="lazy"
+            quality={80}
+          />
+        </button>
       ))}
     </div>
 
@@ -105,10 +112,23 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
       ))}
     </section>
 
-    <footer class="case-study__next shell">
-      <a href={withBase('/interiors')}>&lt; Back to all Projects</a>
-      <span aria-hidden="true">|</span>
-      <strong>{project.data.title}</strong>
+    <footer class="case-study__meta shell">
+      <div class="case-study__dots" data-project-carousel-dots>
+        {carouselSlides.map((_, index) => (
+          <button
+            class:list={['case-study__dot', { 'is-active': index === 0 }]}
+            type="button"
+            aria-label={`Go to project image ${index + 1}`}
+            data-project-carousel-dot
+          ></button>
+        ))}
+      </div>
+
+      <div class="case-study__next">
+        <a href={withBase('/interiors')}>&lt; Back to all Projects</a>
+        <span aria-hidden="true">|</span>
+        <strong>{project.data.title}</strong>
+      </div>
     </footer>
   </article>
 
@@ -147,6 +167,8 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
     const nextButton = carousel.querySelector('[data-project-carousel-next]');
     const dotsContainer = carousel.parentElement?.querySelector('[data-project-carousel-dots]');
     const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('[data-project-carousel-dot]')) : [];
+    const thumbnailsContainer = carousel.parentElement?.querySelector('[data-project-carousel-thumbnails]');
+    const thumbnails = thumbnailsContainer ? Array.from(thumbnailsContainer.querySelectorAll('[data-project-carousel-thumbnail]')) : [];
     const lightboxTriggers = Array.from(carousel.querySelectorAll('[data-project-lightbox-trigger]'));
     const desktopQuery = window.matchMedia('(min-width: 721px)');
     let activeIndex = 0;
@@ -158,6 +180,21 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
     const update = () => {
       slides.forEach((slide, index) => slide.classList.toggle('is-active', index === activeIndex));
       dots.forEach((dot, index) => dot.classList.toggle('is-active', index === activeIndex));
+      thumbnails.forEach((thumbnail, index) => thumbnail.classList.toggle('is-active', index === activeIndex));
+
+      const activeThumbnail = thumbnails[activeIndex];
+      if (activeThumbnail && thumbnailsContainer) {
+        const containerRect = thumbnailsContainer.getBoundingClientRect();
+        const activeRect = activeThumbnail.getBoundingClientRect();
+        const overflowLeft = activeRect.left - containerRect.left;
+        const overflowRight = activeRect.right - containerRect.right;
+
+        if (overflowLeft < 0) {
+          thumbnailsContainer.scrollBy({ left: overflowLeft - 12, behavior: 'smooth' });
+        } else if (overflowRight > 0) {
+          thumbnailsContainer.scrollBy({ left: overflowRight + 12, behavior: 'smooth' });
+        }
+      }
     };
 
     const setTrackOffset = (animate = true) => {
@@ -227,6 +264,7 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
     prevButton?.addEventListener('click', () => scrollBySlide(-1));
     nextButton?.addEventListener('click', () => scrollBySlide(1));
     dots.forEach((dot, index) => dot.addEventListener('click', () => scrollToSlide(index)));
+    thumbnails.forEach((thumbnail, index) => thumbnail.addEventListener('click', () => scrollToSlide(index)));
     lightboxTriggers.forEach((trigger) => {
       trigger.addEventListener('click', () => {
         openLightbox(Number(trigger.getAttribute('data-project-lightbox-index')) || 0);
@@ -306,6 +344,17 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
     font-size: 0.86rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .case-study__meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1.5rem;
+  }
+
+  .case-study__thumbnails {
+    display: none;
   }
 
   .case-study__next a {
@@ -452,7 +501,7 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
       display: block;
       width: 100%;
       overflow: hidden;
-      padding-top: clamp(0.5rem, 1.5vh, 1rem);
+      padding-top: 0;
     }
 
     .case-study__carousel-track {
@@ -566,8 +615,9 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
       align-items: center;
       gap: 0.72rem;
       width: 100%;
-      margin: 1.05rem auto 0;
+      margin: 0;
       padding: 0;
+      flex: 0 0 auto;
     }
 
     .case-study__dot {
@@ -605,9 +655,82 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
       display: none;
     }
 
-    .case-study__next {
-      margin-top: 1.15rem;
+    .case-study__thumbnails {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      width: min(1120px, calc(100% - 16vw));
+      margin: 0.6rem auto 0;
+      padding: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(43, 43, 43, 0.24) transparent;
+    }
+
+    .case-study__thumbnails::-webkit-scrollbar {
+      height: 0.35rem;
+    }
+
+    .case-study__thumbnails::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .case-study__thumbnails::-webkit-scrollbar-thumb {
+      background: rgba(43, 43, 43, 0.24);
+      border-radius: 999px;
+    }
+
+    .case-study__thumbnail {
+      flex: 0 0 auto;
+      width: 3.45rem;
+      height: 3.45rem;
+      padding: 0;
+      border: 1px solid rgba(43, 43, 43, 0.12);
+      background: rgba(253, 251, 247, 0.9);
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0.72;
+      transition:
+        opacity 220ms ease,
+        border-color 220ms ease,
+        transform 220ms ease;
+    }
+
+    .case-study__thumbnail:hover,
+    .case-study__thumbnail:focus-visible,
+    .case-study__thumbnail.is-active {
+      opacity: 1;
+      border-color: rgba(43, 43, 43, 0.45);
+    }
+
+    .case-study__thumbnail.is-active {
+      transform: translateY(-1px);
+    }
+
+    .case-study__thumbnail img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .case-study__meta {
+      margin-top: 0.5rem;
       margin-bottom: 0.1rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .case-study__next {
+      width: 100%;
+      margin: 0 auto;
+      justify-content: flex-start;
       padding-top: 0;
     }
   }
@@ -623,6 +746,14 @@ const carouselSlides = project.data.storyImages.map((image, index) => ({
 
     .case-study__dots {
       display: none;
+    }
+
+    .case-study__thumbnails {
+      display: none;
+    }
+
+    .case-study__meta {
+      display: block;
     }
 
     .case-study__story-item,

@@ -12,7 +12,6 @@ storyImages:
   - ./story/05.jpg
   - ./story/06.jpg
   - ./story/07.jpg
-  - ./story/08.jpg
 nextProjectSlug: "new-york-apartment"
 sortOrder: 1
 featured: true
